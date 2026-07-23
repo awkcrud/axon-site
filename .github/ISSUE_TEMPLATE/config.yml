@@ -1,0 +1,8 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Private app repository
+    url: https://github.com/awkcrud/AXON
+    about: Source and releases (access required)
+  - name: Latest release
+    url: https://github.com/awkcrud/AXON/releases/latest
+    about: Download AXON.exe

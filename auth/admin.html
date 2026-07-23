@@ -1,0 +1,794 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <meta name="robots" content="noindex,nofollow"/>
+  <title>AXON · Panel</title>
+  <link rel="icon" href="../favicon.ico" sizes="any"/>
+  <link rel="icon" type="image/png" href="../favicon.png"/>
+  <style>
+    :root{
+      --bg:#070707;--panel:#121212;--ink:#ececec;--muted:#777;
+      --accent:#c5ff3a;--line:#2a2a2a;--danger:#ff5a5a;--mono:Consolas,"Cascadia Mono",monospace;
+    }
+    *{box-sizing:border-box}
+    body{margin:0;min-height:100vh;background:var(--bg);color:var(--ink);font-family:Bahnschrift,"Segoe UI",sans-serif}
+    .shell{max-width:980px;margin:0 auto;padding:36px 20px 80px}
+    h1{margin:0 0 6px;font-size:28px;color:var(--accent);letter-spacing:.04em}
+    .lead{color:var(--muted);font-family:var(--mono);font-size:12px;margin:0 0 28px;line-height:1.5}
+    .gate,.panel{border:1px solid var(--line);background:var(--panel);padding:22px;margin-bottom:16px}
+    label{display:block;font-family:var(--mono);font-size:11px;color:var(--muted);margin:12px 0 6px;letter-spacing:.08em}
+    input,textarea{width:100%;padding:11px 12px;background:#0c0c0c;border:1px solid #3a3a3a;color:var(--ink);font-family:var(--mono);font-size:13px}
+    .row{display:flex;gap:10px;flex-wrap:wrap;align-items:flex-end}
+    .row > div{flex:1;min-width:140px}
+    button{border:0;cursor:pointer;font-weight:700;padding:11px 16px;font-family:Bahnschrift,sans-serif}
+    .btn{background:var(--accent);color:#070707}
+    .btn.ghost{background:transparent;color:var(--ink);border:1px solid var(--line)}
+    .btn.danger{background:transparent;color:var(--danger);border:1px solid #5a2020}
+    table{width:100%;border-collapse:collapse;font-family:var(--mono);font-size:12px;margin-top:8px}
+    th,td{text-align:left;padding:10px 8px;border-bottom:1px solid var(--line);vertical-align:top}
+    th{color:var(--muted);font-weight:400;letter-spacing:.08em}
+    .empty{color:var(--muted);padding:18px 0;font-family:var(--mono);font-size:12px}
+    .ok{color:var(--accent);font-family:var(--mono);font-size:12px;margin-top:10px}
+    .err{color:var(--danger);font-family:var(--mono);font-size:12px;margin-top:10px}
+    .hidden{display:none !important}
+    code{color:var(--accent)}
+    .hw{font-size:11px;word-break:break-all;color:#bbb}
+    .pass{font-size:11px;word-break:break-all;color:#6DCEA0}
+    .dot{display:inline-block;width:8px;height:8px;border-radius:50%;margin-right:6px;vertical-align:middle}
+    .dot.on{background:var(--accent)}
+    .dot.off{background:#555}
+    .dash{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin:0 0 18px}
+    .dash .cell{border:1px solid var(--line);background:#0c0c0c;padding:12px 10px}
+    .dash .cell b{display:block;font-family:var(--mono);font-size:20px;color:var(--accent);margin:0 0 4px}
+    .dash .cell span{font-family:var(--mono);font-size:10px;color:var(--muted);letter-spacing:.1em}
+    .heat{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
+    .heat .bar{
+      font-family:var(--mono);font-size:11px;border:1px solid var(--line);padding:7px 9px;color:#ccc;
+      background:linear-gradient(90deg, rgba(197,255,58,.18) var(--p,0%), transparent var(--p,0%));
+    }
+    @media (max-width:720px){.dash{grid-template-columns:1fr 1fr}}
+  </style>
+</head>
+<body>
+  <div class="shell">
+    <h1>AXON · PANEL</h1>
+    <p class="lead">
+      Unlock with admin key only. Vault secret and GitHub token are sealed in an AES-GCM pack (PBKDF2 310k).
+      Pending HWID requests arrive as encrypted GitHub Issues from the app. Approve binds HWID and publishes <code>accounts.json</code>.
+    </p>
+
+    <div class="gate" id="gate">
+      <label>ADMIN KEY</label>
+      <input id="adminKey" type="password" placeholder="panel key" autocomplete="off"/>
+      <div style="margin-top:14px">
+        <button class="btn" id="unlockBtn">Unlock</button>
+      </div>
+      <div class="err hidden" id="gateErr"></div>
+    </div>
+
+    <div class="panel hidden" id="app">
+      <div class="dash" id="dash">
+        <div class="cell"><b id="dAccounts">0</b><span>ACCOUNTS</span></div>
+        <div class="cell"><b id="dOnline">0</b><span>ONLINE</span></div>
+        <div class="cell"><b id="dReports">0</b><span>STRATEGY REPORTS</span></div>
+        <div class="cell"><b id="dCatalog">-</b><span>CATALOG</span></div>
+      </div>
+
+      <div class="row">
+        <div>
+          <label>USER</label>
+          <input id="user" placeholder="username"/>
+        </div>
+        <div>
+          <label>PASSWORD</label>
+          <input id="pass" type="password" placeholder="••••••••"/>
+        </div>
+        <div>
+          <label>HWID (optional)</label>
+          <input id="hwid" placeholder="paste HWID"/>
+        </div>
+        <div style="flex:0">
+          <button class="btn" id="addBtn">Add / Update</button>
+        </div>
+      </div>
+
+      <label style="margin-top:22px">ACCOUNTS</label>
+      <div id="list" class="empty">Empty</div>
+
+      <label style="margin-top:22px">PENDING BINDS (encrypted issues)</label>
+      <div class="row" style="margin-top:8px">
+        <button class="btn ghost" id="refreshPendingBtn">Refresh inbox</button>
+        <button class="btn" id="publishBtn">Publish accounts.json</button>
+      </div>
+      <div id="pending" class="empty">No pending</div>
+
+      <label style="margin-top:22px">STRATEGY REPORTS</label>
+      <p class="lead" style="margin:6px 0 8px">Broken-strategy tickets from the app (<code>[axon-strategy]</code>). Close after you retire or fix the profile.</p>
+      <div class="row" style="margin-top:4px">
+        <button class="btn ghost" id="refreshReportsBtn">Refresh reports</button>
+      </div>
+      <div id="reports" class="empty">No reports</div>
+
+      <label style="margin-top:22px">LIVE SESSIONS</label>
+      <p class="lead" style="margin:6px 0 8px">One row per account (newest / online wins). Heartbeats → branch <code>presence</code>. Duplicate rows from shared logins or old HWIDs are merged; purge cleans offline junk.</p>
+      <div class="row" style="margin-top:4px">
+        <button class="btn ghost" id="refreshLiveBtn">Refresh live</button>
+        <button class="btn ghost" id="purgeLiveBtn">Purge offline</button>
+        <label style="display:flex;align-items:center;gap:8px;margin:0;text-transform:none;letter-spacing:0;font-size:12px;color:var(--muted)">
+          <input type="checkbox" id="showAllDevices" style="width:auto"/> Show all devices
+        </label>
+      </div>
+      <div id="live" class="empty">No sessions</div>
+
+      <label style="margin-top:22px">STRATEGY HEAT</label>
+      <p class="lead" style="margin:6px 0 8px">What online sessions are running right now (from presence heartbeats).</p>
+      <div id="heat" class="empty">No heat data</div>
+
+      <div class="row" style="margin-top:18px">
+        <button class="btn ghost" id="exportBtn">Download accounts.json</button>
+        <button class="btn ghost" id="importBtn">Import</button>
+        <button class="btn ghost" id="copyBtn">Copy JSON</button>
+        <input id="fileIn" type="file" accept="application/json,.json" class="hidden"/>
+      </div>
+
+      <div class="ok hidden" id="status"></div>
+      <label>PREVIEW</label>
+      <textarea id="preview" rows="10" readonly></textarea>
+    </div>
+  </div>
+
+  <script>
+    // Sealed secrets: vaultSecret + ghToken. Unlock derives key from ADMIN KEY only.
+    const ADMIN_PACK = {"format":"axon-admin-pack-1","kdf":"pbkdf2-sha256","iter":310000,"salt":"C+dnESgXYB5NLT6f+3RU9w==","nonce":"mvTDLRDDdMtX/gUP","data":"hs4TqUE6yQR0GdPCo33/0SHuJglsnMiISSxLMz7ZPvIzcZUGfpx591Woo9uE1oQD+WSY+tjw2d1SB3D+XxwhVsug0rjkzUdX08HDLbKSBipB5vVtXdxnlrC8H940ZQpS2m2Za7yqNW+SQoO+2CoIH7PRui6Tq6RiMNcIt0Yl1wwfOApcae/hMNfTSZFZU5tMF8BEeyCRhX4JRryByQyM9jwUOc79wr26nwLhvhw=","aad":"axon-admin-pack-v1"};
+    const GH_REPO = 'awkcrud/axon-site';
+    const GH_PATH = 'auth/accounts.json';
+
+    let db = { accounts: [] };
+    let vaultSecret = '';
+    let ghToken = '';
+    let liveTimer = null;
+
+    const $ = (id) => document.getElementById(id);
+    const b64 = (buf) => btoa(String.fromCharCode(...new Uint8Array(buf)));
+    const fromB64 = (s) => Uint8Array.from(atob(s), c => c.charCodeAt(0));
+    const enc = new TextEncoder();
+    const dec = new TextDecoder();
+
+    async function pbkdf2Key(password, salt, iterations) {
+      const material = await crypto.subtle.importKey('raw', enc.encode(password), 'PBKDF2', false, ['deriveBits']);
+      const bits = await crypto.subtle.deriveBits({ name:'PBKDF2', salt, iterations, hash:'SHA-256' }, material, 256);
+      return crypto.subtle.importKey('raw', bits, 'AES-GCM', false, ['encrypt', 'decrypt']);
+    }
+
+    async function unlockAdminPack(password) {
+      const salt = fromB64(ADMIN_PACK.salt);
+      const nonce = fromB64(ADMIN_PACK.nonce);
+      const data = fromB64(ADMIN_PACK.data);
+      const aad = enc.encode(ADMIN_PACK.aad || 'axon-admin-pack-v1');
+      const key = await pbkdf2Key(password, salt, ADMIN_PACK.iter || 310000);
+      const plain = await crypto.subtle.decrypt({ name:'AES-GCM', iv: nonce, additionalData: aad }, key, data);
+      return JSON.parse(dec.decode(plain));
+    }
+
+    async function deriveVaultKey(secret) {
+      const material = await crypto.subtle.digest('SHA-256', enc.encode('AXON-VAULT-v1|' + secret));
+      return crypto.subtle.importKey('raw', material, 'AES-GCM', false, ['encrypt', 'decrypt']);
+    }
+
+    async function pbkdf2Hash(password, saltBytes) {
+      const key = await crypto.subtle.importKey('raw', enc.encode(password), 'PBKDF2', false, ['deriveBits']);
+      const bits = await crypto.subtle.deriveBits({ name:'PBKDF2', salt: saltBytes, iterations:120000, hash:'SHA-256' }, key, 256);
+      return b64(bits);
+    }
+
+    async function encryptVault(database, secret) {
+      const key = await deriveVaultKey(secret);
+      const nonce = crypto.getRandomValues(new Uint8Array(12));
+      const cipher = await crypto.subtle.encrypt({ name:'AES-GCM', iv: nonce }, key, enc.encode(JSON.stringify(database)));
+      return { format: 'axon-vault-1', nonce: b64(nonce), data: b64(cipher) };
+    }
+
+    async function decryptVault(obj, secret) {
+      if (!obj || obj.format !== 'axon-vault-1') {
+        if (obj && Array.isArray(obj.accounts)) return obj;
+        throw new Error('Unknown format');
+      }
+      const key = await deriveVaultKey(secret);
+      const nonce = fromB64(obj.nonce);
+      const data = fromB64(obj.data);
+      const plain = await crypto.subtle.decrypt({ name:'AES-GCM', iv: nonce }, key, data);
+      return JSON.parse(dec.decode(plain));
+    }
+
+    async function decryptPresenceBlob(obj) {
+      if (typeof obj === 'string') obj = JSON.parse(obj);
+      if (!obj || obj.format !== 'axon-presence-1') throw new Error('Not axon-presence-1');
+      const key = await deriveVaultKey(vaultSecret);
+      const nonce = fromB64(obj.nonce);
+      const data = fromB64(obj.data);
+      const aad = enc.encode(obj.aad || 'axon-presence-v1');
+      const plain = await crypto.subtle.decrypt({ name:'AES-GCM', iv: nonce, additionalData: aad }, key, data);
+      return JSON.parse(dec.decode(plain));
+    }
+
+    function fmtDur(sec) {
+      sec = Math.max(0, Number(sec) || 0);
+      const h = Math.floor(sec / 3600);
+      const m = Math.floor((sec % 3600) / 60);
+      const s = sec % 60;
+      if (h > 0) return `${h}h ${m}m`;
+      if (m > 0) return `${m}m ${s}s`;
+      return `${s}s`;
+    }
+
+    function fmtTs(unix) {
+      if (!unix) return '-';
+      try { return new Date(unix * 1000).toLocaleString(); } catch { return String(unix); }
+    }
+
+    async function loadLive() {
+      const box = $('live');
+      box.className = 'empty';
+      box.textContent = 'Loading…';
+      try {
+        const url = `https://api.github.com/repos/${GH_REPO}/contents/auth/presence?ref=presence`;
+        const list = await fetch(url, {
+          headers: { Authorization: 'Bearer ' + ghToken, Accept: 'application/vnd.github+json' }
+        }).then(async r => {
+          if (r.status === 404) return [];
+          if (!r.ok) throw new Error('HTTP ' + r.status);
+          return r.json();
+        });
+        const files = (Array.isArray(list) ? list : []).filter(f => f.type === 'file' && /\.json$/i.test(f.name));
+        const rows = [];
+        const now = Math.floor(Date.now() / 1000);
+        for (const f of files) {
+          try {
+            const meta = await fetch(f.url, {
+              headers: { Authorization: 'Bearer ' + ghToken, Accept: 'application/vnd.github+json' }
+            }).then(r => r.json());
+            const raw = dec.decode(fromB64((meta.content || '').replace(/\n/g, '')));
+            const payload = await decryptPresenceBlob(JSON.parse(raw));
+            const last = Number(payload.lastSeen) || 0;
+            const stale = payload.online && (now - last > 120);
+            rows.push({
+              ...payload,
+              online: !!payload.online && !stale,
+              _stale: stale,
+              _file: f.name,
+              _sha: meta.sha,
+              _path: f.path || ('auth/presence/' + f.name),
+            });
+          } catch (e) {
+            rows.push({ user: f.name, online: false, strategy: '-', sessionSec: 0, _err: String(e.message || e), _file: f.name });
+          }
+        }
+
+        // Prefer one row per username: online first, then newest lastSeen.
+        const showAll = !!($('showAllDevices') && $('showAllDevices').checked);
+        let view = rows.filter(r => !r._err);
+        if (!showAll) {
+          const byUser = new Map();
+          for (const p of view) {
+            const key = String(p.user || '').trim().toLowerCase() || p._file;
+            const prev = byUser.get(key);
+            if (!prev) { byUser.set(key, p); continue; }
+            const score = (x) => (x.online ? 1e12 : 0) + (Number(x.lastSeen) || 0);
+            if (score(p) >= score(prev)) byUser.set(key, p);
+          }
+          view = [...byUser.values()];
+          // annotate if account has more device files
+          const counts = {};
+          for (const r of rows) {
+            if (r._err) continue;
+            const k = String(r.user || '').trim().toLowerCase() || r._file;
+            counts[k] = (counts[k] || 0) + 1;
+          }
+          for (const p of view) {
+            const k = String(p.user || '').trim().toLowerCase() || p._file;
+            p._devices = counts[k] || 1;
+          }
+        }
+
+        view.sort((a, b) => (b.online === a.online ? 0 : b.online ? 1 : -1) || String(a.user).localeCompare(String(b.user)));
+        const errRows = rows.filter(r => r._err);
+        const onlineN = view.filter(p => p.online).length;
+        if ($('dOnline')) $('dOnline').textContent = String(onlineN);
+        renderHeat(view.filter(p => p.online));
+
+        if (!view.length && !errRows.length) {
+          box.textContent = 'No sessions yet';
+          return;
+        }
+        box.className = '';
+        box.innerHTML = `<table><thead><tr>
+          <th>STATUS</th><th>USER</th><th>STRATEGY</th><th>ENGINE</th><th>SESSION</th><th>LAST / STOPPED</th>
+        </tr></thead><tbody>` + view.map(p => {
+          const status = p.online
+            ? `<span class="dot on"></span>online`
+            : `<span class="dot off"></span>${p._stale ? 'stale' : 'offline'}`;
+          const sess = p.online
+            ? fmtDur(Math.max(0, now - (Number(p.startedAt) || now)))
+            : fmtDur(p.sessionSec);
+          const when = p.online
+            ? `seen ${fmtTs(p.lastSeen)}`
+            : `stopped ${fmtTs(p.stoppedAt || p.lastSeen)}`;
+          const devices = p._devices > 1 ? ` · ${p._devices} devices` : '';
+          return `<tr>
+            <td>${status}</td>
+            <td>${escapeHtml(p.user || '')}<div class="hw">${escapeHtml((p.hwid || '').slice(0, 16))}… · app ${escapeHtml(String(p.app || ''))}${devices}</div></td>
+            <td>${escapeHtml(p.strategy || '-')}</td>
+            <td>${p.engine ? 'ON' : 'off'}</td>
+            <td>${escapeHtml(sess)}</td>
+            <td class="hw">${escapeHtml(when)}</td>
+          </tr>`;
+        }).join('') + errRows.map(p =>
+          `<tr><td colspan="6" class="hw">${escapeHtml(p._file)} · ${escapeHtml(p._err)}</td></tr>`
+        ).join('') + `</tbody></table>`;
+
+        // stash for purge
+        window.__liveRows = rows;
+      } catch (e) {
+        box.textContent = 'Live error: ' + (e.message || e);
+      }
+    }
+
+    function renderHeat(onlineRows) {
+      const box = $('heat');
+      if (!box) return;
+      const counts = {};
+      for (const p of onlineRows || []) {
+        const s = String(p.strategy || '-').trim() || '-';
+        counts[s] = (counts[s] || 0) + 1;
+      }
+      const entries = Object.entries(counts).sort((a, b) => b[1] - a[1]);
+      if (!entries.length) {
+        box.className = 'empty';
+        box.textContent = 'No online sessions';
+        return;
+      }
+      const max = entries[0][1] || 1;
+      box.className = 'heat';
+      box.innerHTML = entries.map(([name, n]) => {
+        const pct = Math.round((n / max) * 100);
+        return `<div class="bar" style="--p:${pct}%">${escapeHtml(name)} · ${n}</div>`;
+      }).join('');
+    }
+
+    async function loadCatalogMeta() {
+      try {
+        const j = await fetch(
+          'https://raw.githubusercontent.com/awkcrud/axon-site/catalog/strategies/catalog.json',
+          { cache: 'no-store' }
+        ).then(r => r.json());
+        if ($('dCatalog')) $('dCatalog').textContent = 'v' + (j.version || '?') + ' · ' + ((j.strategies || []).length);
+      } catch {
+        if ($('dCatalog')) $('dCatalog').textContent = '-';
+      }
+    }
+
+    async function loadReports() {
+      const box = $('reports');
+      if (!box) return;
+      box.className = 'empty';
+      box.textContent = 'Loading…';
+      try {
+        const url = `https://api.github.com/repos/${GH_REPO}/issues?state=open&per_page=50&sort=created&direction=desc`;
+        const issues = await fetch(url, {
+          headers: { Authorization: 'Bearer ' + ghToken, Accept: 'application/vnd.github+json' }
+        }).then(r => {
+          if (!r.ok) throw new Error('HTTP ' + r.status);
+          return r.json();
+        });
+        const rows = (Array.isArray(issues) ? issues : []).filter(i =>
+          String(i.title || '').includes('[axon-strategy]') ||
+          String(i.body || '').includes('axon-strategy-report')
+        );
+        if ($('dReports')) $('dReports').textContent = String(rows.length);
+        if (!rows.length) {
+          box.textContent = 'No open strategy reports';
+          return;
+        }
+        box.className = '';
+        box.innerHTML = `<table><thead><tr><th>STRATEGY</th><th>USER / META</th><th></th></tr></thead><tbody>` +
+          rows.map(issue => {
+            const body = issue.body || '';
+            const strat = (body.match(/\*\*Strategy:\*\*\s*`?([^`\n]+)`?/i) || [])[1]
+              || (issue.title || '').replace(/^\[axon-strategy\]\s*/i, '');
+            const user = (body.match(/\*\*User:\*\*\s*`?([^`\n]+)`?/i) || [])[1] || '-';
+            const app = (body.match(/\*\*App:\*\*\s*([^\n]+)/i) || [])[1] || '';
+            const when = (body.match(/\*\*UTC:\*\*\s*([^\n]+)/i) || [])[1] || '';
+            return `<tr>
+              <td>${escapeHtml(strat.trim())}<div class="hw">#${issue.number}</div></td>
+              <td>${escapeHtml(user.trim())}<div class="hw">${escapeHtml(app.trim())}${when ? ' · ' + escapeHtml(when.trim()) : ''}</div></td>
+              <td>
+                <a class="btn ghost" href="${escapeHtml(issue.html_url)}" target="_blank" rel="noopener">Open</a>
+                <button class="btn danger" data-close-report="${issue.number}" style="margin-top:6px">Dismiss</button>
+              </td>
+            </tr>`;
+          }).join('') + `</tbody></table>`;
+        box.querySelectorAll('[data-close-report]').forEach(btn => {
+          btn.onclick = async () => {
+            try {
+              await closeIssue(+btn.dataset.closeReport);
+              showStatus('Closed report #' + btn.dataset.closeReport);
+              await loadReports();
+            } catch (e) {
+              showStatus(String(e.message || e), false);
+            }
+          };
+        });
+      } catch (e) {
+        box.textContent = 'Reports error: ' + (e.message || e);
+      }
+    }
+
+    async function purgeOfflineLive() {
+      const rows = window.__liveRows || [];
+      const now = Math.floor(Date.now() / 1000);
+      const victims = rows.filter(p => {
+        if (p._err || !p._path || !p._sha) return false;
+        if (p.online) return false;
+        const last = Number(p.lastSeen) || Number(p.stoppedAt) || 0;
+        // offline older than 2 hours, or never seen
+        return !last || (now - last > 7200);
+      });
+      if (!victims.length) {
+        showStatus('Nothing to purge (offline > 2h)', true);
+        return;
+      }
+      if (!confirm(`Delete ${victims.length} offline presence file(s)?`)) return;
+      let ok = 0, fail = 0;
+      for (const p of victims) {
+        try {
+          const delUrl = `https://api.github.com/repos/${GH_REPO}/contents/${p._path}`;
+          const r = await fetch(delUrl, {
+            method: 'DELETE',
+            headers: {
+              Authorization: 'Bearer ' + ghToken,
+              Accept: 'application/vnd.github+json',
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+              message: `chore(presence): purge offline ${p.user || p._file}`,
+              sha: p._sha,
+              branch: 'presence',
+            }),
+          });
+          if (r.ok) ok++; else fail++;
+        } catch { fail++; }
+      }
+      showStatus(`Purged ${ok}` + (fail ? `, failed ${fail}` : ''), fail === 0);
+      await loadLive();
+    }
+
+    async function decryptBindBlob(obj) {
+      if (typeof obj === 'string') obj = JSON.parse(obj);
+      if (!obj || obj.format !== 'axon-bind-1') throw new Error('Not axon-bind-1');
+      const key = await deriveVaultKey(vaultSecret);
+      const nonce = fromB64(obj.nonce);
+      const data = fromB64(obj.data);
+      const aad = enc.encode(obj.aad || 'axon-bind-v1');
+      const plain = await crypto.subtle.decrypt({ name:'AES-GCM', iv: nonce, additionalData: aad }, key, data);
+      return JSON.parse(dec.decode(plain));
+    }
+
+    function escapeHtml(s) {
+      return String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+    }
+
+    function extractBindJson(body) {
+      if (!body) return null;
+      const m = body.match(/```(?:json)?\s*([\s\S]*?)```/);
+      const raw = (m ? m[1] : body).trim();
+      const start = raw.indexOf('{');
+      const end = raw.lastIndexOf('}');
+      if (start < 0 || end <= start) return null;
+      return JSON.parse(raw.slice(start, end + 1));
+    }
+
+    function render() {
+      if ($('dAccounts')) $('dAccounts').textContent = String((db.accounts || []).length);
+      const box = $('list');
+      if (!db.accounts.length) {
+        box.className = 'empty';
+        box.textContent = 'Empty';
+      } else {
+        box.className = '';
+        box.innerHTML = `<table><thead><tr><th>USER</th><th>HWIDS</th><th></th></tr></thead><tbody>` +
+          db.accounts.map((a,i) => {
+            const hw = (a.hwids || []).join('\n') || '-';
+            return `<tr>
+              <td>${escapeHtml(a.user)}</td>
+              <td>
+                <div class="hw">${escapeHtml(hw)}</div>
+                <div class="row" style="margin-top:8px">
+                  <input data-hw="${i}" placeholder="add HWID" style="min-width:220px"/>
+                  <button class="btn ghost" data-bind="${i}">Bind</button>
+                  <button class="btn ghost" data-clear="${i}">Clear HWIDs</button>
+                </div>
+              </td>
+              <td><button class="btn danger" data-del="${i}">Delete</button></td>
+            </tr>`;
+          }).join('') + `</tbody></table>`;
+
+        box.querySelectorAll('[data-del]').forEach(btn => {
+          btn.onclick = () => { db.accounts.splice(+btn.dataset.del, 1); render(); };
+        });
+        box.querySelectorAll('[data-bind]').forEach(btn => {
+          btn.onclick = () => {
+            const i = +btn.dataset.bind;
+            const input = box.querySelector(`input[data-hw="${i}"]`);
+            const val = (input?.value || '').trim();
+            if (!val) { showStatus('Paste HWID first', false); return; }
+            const list = db.accounts[i].hwids || (db.accounts[i].hwids = []);
+            if (!list.includes(val)) list.push(val);
+            input.value = '';
+            render();
+            showStatus(`Bound HWID to ${db.accounts[i].user}`);
+          };
+        });
+        box.querySelectorAll('[data-clear]').forEach(btn => {
+          btn.onclick = () => { db.accounts[+btn.dataset.clear].hwids = []; render(); showStatus('HWIDs cleared'); };
+        });
+      }
+      refreshPreview();
+    }
+
+    async function refreshPreview() {
+      try {
+        const vault = await encryptVault(db, vaultSecret);
+        $('preview').value = JSON.stringify(vault, null, 2);
+      } catch (e) {
+        $('preview').value = String(e);
+      }
+    }
+
+    function showStatus(msg, ok=true) {
+      const el = $('status');
+      el.className = ok ? 'ok' : 'err';
+      el.textContent = msg;
+      el.classList.remove('hidden');
+    }
+
+    async function publishAccounts() {
+      if (!ghToken) throw new Error('No token in pack');
+      const vault = await encryptVault(db, vaultSecret);
+      const content = btoa(unescape(encodeURIComponent(JSON.stringify(vault, null, 2))));
+      const metaUrl = `https://api.github.com/repos/${GH_REPO}/contents/${GH_PATH}`;
+      let sha;
+      const cur = await fetch(metaUrl, {
+        headers: { Authorization: 'Bearer ' + ghToken, Accept: 'application/vnd.github+json' }
+      }).then(r => r.ok ? r.json() : null);
+      if (cur?.sha) sha = cur.sha;
+      const body = { message: 'chore(auth): update accounts', content, branch: 'main' };
+      if (sha) body.sha = sha;
+      const res = await fetch(metaUrl, {
+        method: 'PUT',
+        headers: {
+          Authorization: 'Bearer ' + ghToken,
+          Accept: 'application/vnd.github+json',
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(body),
+      });
+      if (!res.ok) throw new Error(await res.text());
+    }
+
+    async function loadPending() {
+      const box = $('pending');
+      box.className = 'empty';
+      box.textContent = 'Loading…';
+      try {
+        const url = `https://api.github.com/repos/${GH_REPO}/issues?state=open&per_page=50&sort=created&direction=desc`;
+        const issues = await fetch(url, {
+          headers: { Authorization: 'Bearer ' + ghToken, Accept: 'application/vnd.github+json' }
+        }).then(r => {
+          if (!r.ok) throw new Error('HTTP ' + r.status);
+          return r.json();
+        });
+        const rows = [];
+        for (const issue of issues) {
+          const title = issue.title || '';
+          if (!title.includes('[axon-bind]')) continue;
+          let payload = null;
+          let err = '';
+          try {
+            const blob = extractBindJson(issue.body || '');
+            payload = await decryptBindBlob(blob);
+          } catch (e) {
+            err = String(e.message || e);
+          }
+          rows.push({ issue, payload, err });
+        }
+        if (!rows.length) {
+          box.textContent = 'No pending';
+          return;
+        }
+        box.className = '';
+        box.innerHTML = `<table><thead><tr><th>USER</th><th>HWID / PASS</th><th></th></tr></thead><tbody>` +
+          rows.map(({ issue, payload, err }) => {
+            if (!payload) {
+              return `<tr><td colspan="2">#${issue.number} decrypt failed: ${escapeHtml(err)}</td>
+                <td><button class="btn danger" data-close="${issue.number}">Dismiss</button></td></tr>`;
+            }
+            return `<tr>
+              <td>${escapeHtml(payload.user || '')}<div class="hw">#${issue.number} · app ${escapeHtml(String(payload.app || ''))}</div></td>
+              <td>
+                <div class="hw">${escapeHtml(payload.hwid || '')}</div>
+                <div class="pass">${escapeHtml(payload.password || '')}</div>
+              </td>
+              <td>
+                <button class="btn" data-approve="${issue.number}">Approve + publish</button>
+                <button class="btn ghost" data-fill="${issue.number}" style="margin-top:6px">Fill field only</button>
+                <button class="btn danger" data-close="${issue.number}" style="margin-top:6px">Dismiss</button>
+              </td>
+            </tr>`;
+          }).join('') + `</tbody></table>`;
+
+        const byNum = Object.fromEntries(rows.map(r => [String(r.issue.number), r]));
+
+        box.querySelectorAll('[data-approve]').forEach(btn => {
+          btn.onclick = async () => {
+            const row = byNum[btn.dataset.approve];
+            if (!row?.payload) return;
+            const u = row.payload.user;
+            const h = row.payload.hwid;
+            let acc = db.accounts.find(a => a.user.toLowerCase() === String(u).toLowerCase());
+            if (!acc) {
+              showStatus('Create the account first, then Approve', false);
+              return;
+            }
+            acc.hwids = acc.hwids || [];
+            if (h && !acc.hwids.includes(h)) acc.hwids.push(h);
+            render();
+            try {
+              await publishAccounts();
+              await closeIssue(row.issue.number);
+              showStatus(`Approved ${u} · published`);
+              await loadPending();
+            } catch (e) {
+              showStatus('Approve failed: ' + e.message, false);
+            }
+          };
+        });
+        box.querySelectorAll('[data-fill]').forEach(btn => {
+          btn.onclick = () => {
+            const row = byNum[btn.dataset.fill];
+            if (!row?.payload) return;
+            $('user').value = row.payload.user || '';
+            $('pass').value = row.payload.password || '';
+            $('hwid').value = row.payload.hwid || '';
+            showStatus('Filled form from request');
+          };
+        });
+        box.querySelectorAll('[data-close]').forEach(btn => {
+          btn.onclick = async () => {
+            try {
+              await closeIssue(+btn.dataset.close);
+              showStatus('Dismissed #' + btn.dataset.close);
+              await loadPending();
+            } catch (e) {
+              showStatus(String(e.message || e), false);
+            }
+          };
+        });
+      } catch (e) {
+        box.textContent = 'Inbox error: ' + (e.message || e);
+      }
+    }
+
+    async function closeIssue(num) {
+      const res = await fetch(`https://api.github.com/repos/${GH_REPO}/issues/${num}`, {
+        method: 'PATCH',
+        headers: {
+          Authorization: 'Bearer ' + ghToken,
+          Accept: 'application/vnd.github+json',
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ state: 'closed' }),
+      });
+      if (!res.ok) throw new Error(await res.text());
+    }
+
+    $('unlockBtn').onclick = async () => {
+      $('gateErr').classList.add('hidden');
+      try {
+        const secrets = await unlockAdminPack(($('adminKey').value || '').trim());
+        vaultSecret = secrets.vaultSecret || '';
+        ghToken = secrets.ghToken || '';
+        if (!vaultSecret || !ghToken) throw new Error('Pack incomplete');
+      } catch {
+        $('gateErr').textContent = 'Wrong admin key or damaged pack';
+        $('gateErr').classList.remove('hidden');
+        return;
+      }
+      try {
+        const cur = await fetch('./accounts.json', { cache: 'no-store' }).then(r => r.json());
+        db = await decryptVault(cur, vaultSecret);
+        if (!Array.isArray(db.accounts)) db = { accounts: [] };
+      } catch {
+        db = { accounts: [] };
+      }
+      $('gate').classList.add('hidden');
+      $('app').classList.remove('hidden');
+      render();
+      await loadPending();
+      await loadReports();
+      await loadCatalogMeta();
+      await loadLive();
+      if (liveTimer) clearInterval(liveTimer);
+      liveTimer = setInterval(() => { loadLive(); loadReports(); }, 30000);
+    };
+
+    $('addBtn').onclick = async () => {
+      const user = $('user').value.trim();
+      const pass = $('pass').value;
+      const hwid = $('hwid').value.trim();
+      if (!user || !pass) { showStatus('User and password required', false); return; }
+      const saltBytes = crypto.getRandomValues(new Uint8Array(16));
+      const salt = b64(saltBytes);
+      const passHash = await pbkdf2Hash(pass, saltBytes);
+      const prev = db.accounts.find(a => a.user.toLowerCase() === user.toLowerCase());
+      const hwids = [...(prev?.hwids || [])];
+      if (hwid && !hwids.includes(hwid)) hwids.push(hwid);
+      const entry = { user, passHash, salt, hwids, recovery: prev?.recovery || {} };
+      db.accounts = db.accounts.filter(a => a.user.toLowerCase() !== user.toLowerCase());
+      db.accounts.push(entry);
+      $('user').value = '';
+      $('pass').value = '';
+      $('hwid').value = '';
+      render();
+      showStatus(`Saved: ${user}`);
+    };
+
+    $('exportBtn').onclick = async () => {
+      const vault = await encryptVault(db, vaultSecret);
+      const blob = new Blob([JSON.stringify(vault, null, 2)], { type: 'application/json' });
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      a.download = 'accounts.json';
+      a.click();
+      URL.revokeObjectURL(a.href);
+      showStatus('Downloaded');
+    };
+
+    $('copyBtn').onclick = async () => {
+      await navigator.clipboard.writeText($('preview').value);
+      showStatus('Copied');
+    };
+
+    $('importBtn').onclick = () => $('fileIn').click();
+    $('fileIn').onchange = async (e) => {
+      const f = e.target.files?.[0];
+      if (!f) return;
+      try {
+        const obj = JSON.parse(await f.text());
+        db = await decryptVault(obj, vaultSecret);
+        if (!Array.isArray(db.accounts)) throw new Error('no accounts');
+        render();
+        showStatus(`Imported: ${db.accounts.length}`);
+      } catch (err) {
+        showStatus('Import failed: ' + err.message, false);
+      }
+    };
+
+    $('publishBtn').onclick = async () => {
+      try {
+        await publishAccounts();
+        showStatus('Published to GitHub');
+      } catch (err) {
+        showStatus('Publish failed: ' + err.message, false);
+      }
+    };
+
+    $('refreshPendingBtn').onclick = () => loadPending();
+    $('refreshReportsBtn').onclick = () => loadReports();
+    $('refreshLiveBtn').onclick = () => loadLive();
+    $('purgeLiveBtn').onclick = () => purgeOfflineLive();
+    $('showAllDevices').onchange = () => loadLive();
+  </script>
+</body>
+</html>

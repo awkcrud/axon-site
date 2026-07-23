@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <title>AXON</title>
+  <link rel="icon" href="favicon.ico" sizes="any"/>
+  <link rel="icon" type="image/png" href="favicon.png"/>
+  <link rel="apple-touch-icon" href="favicon.png"/>
+  <meta name="theme-color" content="#0a0a0a"/>
+  <meta name="description" content="AXON for YouTube, Discord and Telegram."/>
+  <style>
+    :root {
+      --bg:#070707; --panel:#121212; --ink:#ececec; --muted:#7a7a7a;
+      --accent:#c5ff3a; --line:#2a2a2a; --mono:"Cascadia Mono",Consolas,monospace;
+    }
+    *{box-sizing:border-box}
+    body{
+      margin:0;min-height:100vh;color:var(--ink);
+      font-family:Bahnschrift,"Segoe UI",sans-serif;
+      background:
+        radial-gradient(900px 420px at 12% -10%, rgba(197,255,58,.08), transparent 60%),
+        radial-gradient(700px 380px at 90% 0%, rgba(197,255,58,.04), transparent 55%),
+        var(--bg);
+    }
+    .wrap{max-width:680px;margin:0 auto;padding:80px 24px 100px}
+    .top{display:flex;justify-content:flex-end;margin:0 0 20px}
+    .lang{font-family:var(--mono);font-size:11px;color:var(--muted);border:1px solid var(--line);background:transparent;padding:6px 10px;cursor:pointer}
+    .lang.on{color:#070707;background:var(--accent);border-color:var(--accent)}
+    .logo{display:block;width:min(480px,92%);height:auto;margin:0 0 24px}
+    h1{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0,0,0,0)}
+    .sub{font-family:var(--mono);font-size:12px;color:var(--muted);letter-spacing:.06em;margin:0 0 48px}
+    .card{
+      border:1px solid var(--line);background:rgba(18,18,18,.92);
+      padding:28px 24px;margin:0 0 14px;position:relative;
+    }
+    .card:before{content:"";position:absolute;left:0;right:0;top:0;height:2px;background:var(--accent)}
+    .card h2{font-family:var(--mono);font-size:11px;letter-spacing:.18em;color:var(--muted);font-weight:400;margin:0 0 12px}
+    .card p{margin:0 0 18px;line-height:1.65;color:#c4c4c4;font-size:15px}
+    .card p:last-child{margin-bottom:0}
+    .btn{
+      display:inline-block;text-decoration:none;background:var(--accent);color:#070707;
+      font-weight:700;padding:12px 20px;font-size:14px;margin:0 8px 8px 0;
+      transition:transform .15s ease, filter .15s ease;
+    }
+    .btn:hover{transform:translateY(-1px);filter:brightness(1.05)}
+    .btn.ghost{background:transparent;color:var(--ink);border:1px solid var(--line)}
+    .notes{font-family:var(--mono);font-size:12px;line-height:1.7;color:#b0b0b0;white-space:pre-wrap;margin:0}
+    footer{margin-top:52px;font-family:var(--mono);font-size:11px;color:var(--muted)}
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="top">
+      <button type="button" class="lang on" id="btnEn" onclick="setLang('en')">EN</button>
+      <button type="button" class="lang" id="btnRu" onclick="setLang('ru')" style="margin-left:6px">RU</button>
+    </div>
+
+    <img class="logo" src="axon.svg" width="3210" height="576" alt="AXON"/>
+    <h1>AXON</h1>
+    <p class="sub" id="sub">v1.3.1</p>
+
+    <div class="card">
+      <h2 id="tDownload">DOWNLOAD</h2>
+      <p id="pDownload">Latest build for x64. Updates are available from the app menu.</p>
+      <a class="btn" id="dl" href="https://github.com/awkcrud/AXON/releases/latest/download/AXON.exe">Download AXON.exe</a>
+      <a class="btn ghost" id="btnReleases" href="https://github.com/awkcrud/AXON/releases">All releases</a>
+    </div>
+
+    <div class="card">
+      <h2 id="tNotes">WHAT'S NEW</h2>
+      <pre class="notes" id="notesBox">Loading...</pre>
+    </div>
+
+    <div class="card">
+      <h2 id="tStart">START</h2>
+      <p id="pStart">Run as Administrator. Disable VPN and other proxies before launch. Sign in with your account.</p>
+    </div>
+
+    <footer>awk △ crud · AXON</footer>
+  </div>
+  <script>
+    const i18n = {
+      en: {
+        download: 'DOWNLOAD',
+        pDownload: 'Latest build for x64. Updates are available from the app menu.',
+        dl: 'Download AXON.exe',
+        releases: 'All releases',
+        notes: "WHAT'S NEW",
+        start: 'START',
+        pStart: 'Run as Administrator. Disable VPN and other proxies before launch. Sign in with your account.',
+      },
+      ru: {
+        download: 'СКАЧАТЬ',
+        pDownload: 'Актуальная сборка x64. Обновления доступны из меню приложения.',
+        dl: 'Скачать AXON.exe',
+        releases: 'Все релизы',
+        notes: 'ЧТО НОВОГО',
+        start: 'ЗАПУСК',
+        pStart: 'Запусти от имени администратора. Перед стартом отключи VPN и другие прокси. Войди своим аккаунтом.',
+      }
+    };
+
+    const $ = (id) => document.getElementById(id);
+    let notesEn = '';
+    let notesRu = '';
+    let lang = 'en';
+
+    function pickNotes(raw) {
+      if (!raw) return { en: '-', ru: '-' };
+      const parts = String(raw).split(/\n\nAXON /);
+      if (parts.length >= 2) {
+        return { en: parts[0].trim(), ru: ('AXON ' + parts.slice(1).join('\n\nAXON ')).trim() };
+      }
+      return { en: raw, ru: raw };
+    }
+
+    function setLang(l) {
+      lang = l;
+      const t = i18n[l] || i18n.en;
+      document.documentElement.lang = l;
+      $('tDownload').textContent = t.download;
+      $('pDownload').textContent = t.pDownload;
+      $('dl').textContent = t.dl;
+      $('btnReleases').textContent = t.releases;
+      $('tNotes').textContent = t.notes;
+      $('tStart').textContent = t.start;
+      $('pStart').textContent = t.pStart;
+      $('notesBox').textContent = (l === 'ru' ? notesRu : notesEn) || '-';
+      $('btnEn').classList.toggle('on', l === 'en');
+      $('btnRu').classList.toggle('on', l === 'ru');
+      try { localStorage.setItem('axon-lang', l); } catch {}
+    }
+
+    fetch('latest.json', { cache: 'no-store' }).then(r => r.json()).then(j => {
+      if (j.version) $('sub').textContent = 'v' + j.version;
+      if (j.downloadUrl) $('dl').href = j.downloadUrl;
+      const n = pickNotes(j.notes || '');
+      notesEn = n.en;
+      notesRu = n.ru;
+      setLang(localStorage.getItem('axon-lang') || 'en');
+    }).catch(() => setLang(localStorage.getItem('axon-lang') || 'en'));
+  </script>
+</body>
+</html>
