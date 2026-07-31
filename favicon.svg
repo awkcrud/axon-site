@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" role="img" aria-label="AXON">
+  <title>AXON</title>
+  <g fill="#c5ff3a" fill-rule="evenodd">
+    <path d="M28 212 L92 44 H124 L188 212 H152 L108 88 L64 212 Z"/>
+    <path d="M148 44 H180 L208 84 L236 44 H256 V72 L228 108 L256 144 V172 H228 L200 132 L172 172 H148 L184 108 L148 72 Z"/>
+  </g>
+</svg>

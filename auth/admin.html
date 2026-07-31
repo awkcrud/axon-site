@@ -1,0 +1,1650 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <meta name="robots" content="noindex,nofollow"/>
+  <title>AXON · Панель</title>
+  <link rel="icon" href="../favicon.ico" sizes="any"/>
+  <link rel="icon" type="image/png" href="../favicon.png"/>
+  <script src="https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js"></script>
+  <style>
+    :root{
+      --bg:#070707;--panel:#121212;--ink:#ececec;--muted:#777;
+      --accent:#c5ff3a;--line:#2a2a2a;--danger:#ff5a5a;--mono:Consolas,"Cascadia Mono",monospace;
+      --tg:#4d9fff;
+    }
+    *{box-sizing:border-box}
+    body{margin:0;min-height:100vh;background:var(--bg);color:var(--ink);font-family:Bahnschrift,"Segoe UI",sans-serif}
+    .shell{max-width:1380px;margin:0 auto;padding:36px 20px 80px}
+    h1{margin:0 0 6px;font-size:28px;color:var(--accent);letter-spacing:.04em}
+    h2{margin:22px 0 8px;font-size:16px;color:var(--ink);letter-spacing:.06em}
+    .lead{color:var(--muted);font-family:var(--mono);font-size:12px;margin:0 0 28px;line-height:1.5}
+    .gate,.panel{border:1px solid var(--line);background:var(--panel);padding:22px;margin-bottom:16px}
+    label{display:block;font-family:var(--mono);font-size:11px;color:var(--muted);margin:12px 0 6px;letter-spacing:.08em}
+    input,textarea,select{width:100%;padding:11px 12px;background:#0c0c0c;border:1px solid #3a3a3a;color:var(--ink);font-family:var(--mono);font-size:13px}
+    .row{display:flex;gap:10px;flex-wrap:wrap;align-items:flex-end}
+    .row > div{flex:1;min-width:140px}
+    button{border:0;cursor:pointer;font-weight:700;padding:11px 16px;font-family:Bahnschrift,sans-serif}
+    .btn{background:var(--accent);color:#070707}
+    .btn.ghost{background:transparent;color:var(--ink);border:1px solid var(--line)}
+    .btn.danger{background:transparent;color:var(--danger);border:1px solid #5a2020}
+    table{width:100%;border-collapse:collapse;font-family:var(--mono);font-size:12px;margin-top:8px}
+    th,td{text-align:left;padding:10px 8px;border-bottom:1px solid var(--line);vertical-align:top}
+    th{color:var(--muted);font-weight:400;letter-spacing:.08em}
+    .empty{color:var(--muted);padding:18px 0;font-family:var(--mono);font-size:12px}
+    .ok{color:var(--accent);font-family:var(--mono);font-size:12px;margin-top:10px}
+    .err{color:var(--danger);font-family:var(--mono);font-size:12px;margin-top:10px}
+    .hidden{display:none !important}
+    code{color:var(--accent)}
+    .hw{font-size:11px;word-break:break-all;color:#bbb}
+    .pass{font-size:11px;word-break:break-all;color:#6DCEA0}
+    .dot{display:inline-block;width:8px;height:8px;border-radius:50%;margin-right:6px;vertical-align:middle}
+    .dot.on{background:var(--accent)}
+    .dot.off{background:#555}
+    .dash{display:grid;grid-template-columns:repeat(5,1fr);gap:10px;margin:0 0 18px}
+    .dash .cell{border:1px solid var(--line);background:#0c0c0c;padding:12px 10px}
+    .dash .cell b{display:block;font-family:var(--mono);font-size:20px;color:var(--accent);margin:0 0 4px}
+    .dash .cell span{font-family:var(--mono);font-size:10px;color:var(--muted);letter-spacing:.1em}
+    .heat{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
+    .heat .bar{
+      font-family:var(--mono);font-size:11px;border:1px solid var(--line);padding:7px 9px;color:#ccc;
+      background:linear-gradient(90deg, rgba(197,255,58,.18) var(--p,0%), transparent var(--p,0%));
+    }
+    .tabs{display:flex;gap:6px;flex-wrap:wrap;margin:0 0 18px}
+    .tabs button{background:#0c0c0c;color:var(--muted);border:1px solid var(--line);padding:9px 14px;font-size:13px}
+    .tabs button.on{color:#070707;background:var(--accent);border-color:var(--accent)}
+    .tab{display:none}
+    .tab.on{display:block}
+    .chk{display:flex;align-items:flex-start;gap:8px;margin:6px 0;font-family:var(--mono);font-size:12px}
+    .chk input{width:auto;margin-top:2px}
+    .tag{display:inline-block;padding:2px 6px;border:1px solid var(--line);font-size:10px;color:var(--tg);margin-right:4px}
+    .diff-new{color:var(--accent)}
+    .diff-chg{color:#e0c060}
+    .diff-del{color:var(--danger)}
+    canvas.chart{width:100%;max-width:100%;height:180px;background:#0c0c0c;border:1px solid var(--line);margin-top:8px}
+    #tab-pack{max-width:1320px}
+    .pack-wizard{display:grid;gap:12px}
+    .pack-step{border:1px solid var(--line);background:#0c0c0c;padding:18px}
+    .pack-step h3{margin:0;color:var(--ink);font-size:15px;letter-spacing:.04em}
+    .step-no{display:inline-grid;place-items:center;width:24px;height:24px;margin-right:8px;background:var(--accent);color:#070707;font-family:var(--mono);font-size:12px}
+    .step-help{margin:7px 0 14px;color:var(--muted);font-family:var(--mono);font-size:12px;line-height:1.5}
+    .pack-status{position:sticky;bottom:12px;z-index:2;margin:14px 0 0;padding:11px 12px;border:1px solid var(--line);background:#101010;min-height:42px}
+    .lists-preview{min-height:130px}
+    @media (max-width:900px){.dash{grid-template-columns:1fr 1fr}}
+  </style>
+</head>
+<body>
+  <div class="shell">
+    <h1>AXON · ПАНЕЛЬ</h1>
+    <p class="lead">
+      Разблокировка только ключом админа. Секреты vault и GitHub запечатаны в AES-GCM pack (PBKDF2 310k).
+      HWID-заявки приходят зашифрованными Issues. Pack Studio публикует стратегии без пересборки exe.
+    </p>
+
+    <div class="gate" id="gate">
+      <label>КЛЮЧ АДМИНА</label>
+      <input id="adminKey" type="password" placeholder="ключ панели" autocomplete="off"/>
+      <div style="margin-top:14px">
+        <button class="btn" id="unlockBtn">Войти</button>
+      </div>
+      <div class="err hidden" id="gateErr"></div>
+    </div>
+
+    <div class="panel hidden" id="app">
+      <div class="dash" id="dash">
+        <div class="cell"><b id="dAccounts">0</b><span>АККАУНТЫ</span></div>
+        <div class="cell"><b id="dOnline">0</b><span>ОНЛАЙН</span></div>
+        <div class="cell"><b id="dReports">0</b><span>ЖАЛОБЫ</span></div>
+        <div class="cell"><b id="dCatalog">-</b><span>КАТАЛОГ</span></div>
+        <div class="cell"><b id="dPack">-</b><span>PACK</span></div>
+      </div>
+
+      <div class="tabs" id="tabs">
+        <button type="button" data-tab="overview" class="on">Обзор</button>
+        <button type="button" data-tab="accounts">Аккаунты</button>
+        <button type="button" data-tab="pack">Pack Studio</button>
+        <button type="button" data-tab="health">Здоровье</button>
+        <button type="button" data-tab="releases">Релизы</button>
+      </div>
+
+      <!-- OVERVIEW -->
+      <div class="tab on" id="tab-overview">
+        <label>ЖАЛОБЫ НА СТРАТЕГИИ</label>
+        <p class="lead" style="margin:6px 0 8px">Тикеты из приложения (<code>[axon-strategy]</code>). Закрой после фикса или retire в pack.</p>
+        <div class="row" style="margin-top:4px">
+          <button class="btn ghost" id="refreshReportsBtn">Обновить жалобы</button>
+        </div>
+        <div id="reports" class="empty">Нет жалоб</div>
+
+        <label style="margin-top:22px">ЖИВЫЕ СЕССИИ</label>
+        <p class="lead" style="margin:6px 0 8px">Heartbeats → ветка <code>presence</code>. Дубликаты схлопываются.</p>
+        <div class="row" style="margin-top:4px">
+          <button class="btn ghost" id="refreshLiveBtn">Обновить онлайн</button>
+          <button class="btn ghost" id="purgeLiveBtn">Чистить оффлайн</button>
+          <label style="display:flex;align-items:center;gap:8px;margin:0;text-transform:none;letter-spacing:0;font-size:12px;color:var(--muted)">
+            <input type="checkbox" id="showAllDevices" style="width:auto"/> Все устройства
+          </label>
+        </div>
+        <div id="live" class="empty">Нет сессий</div>
+
+        <label style="margin-top:22px">HEAT СТРАТЕГИЙ</label>
+        <p class="lead" style="margin:6px 0 8px">Что крутят онлайн-сессии прямо сейчас.</p>
+        <div id="heat" class="empty">Нет данных</div>
+      </div>
+
+      <!-- ACCOUNTS -->
+      <div class="tab" id="tab-accounts">
+        <div class="row">
+          <div>
+            <label>ЛОГИН</label>
+            <input id="user" placeholder="username"/>
+          </div>
+          <div>
+            <label>ПАРОЛЬ</label>
+            <input id="pass" type="password" placeholder="••••••••"/>
+          </div>
+          <div>
+            <label>HWID (опц.)</label>
+            <input id="hwid" placeholder="вставь HWID"/>
+          </div>
+          <div style="flex:0">
+            <button class="btn" id="addBtn">Добавить / обновить</button>
+          </div>
+        </div>
+
+        <label style="margin-top:22px">АККАУНТЫ</label>
+        <div id="list" class="empty">Пусто</div>
+
+        <label style="margin-top:22px">ОЖИДАЮТ BIND (зашифрованные issues)</label>
+        <div class="row" style="margin-top:8px">
+          <button class="btn ghost" id="refreshPendingBtn">Обновить inbox</button>
+          <button class="btn" id="publishBtn">Опубликовать accounts.json</button>
+        </div>
+        <div id="pending" class="empty">Нет заявок</div>
+
+        <div class="row" style="margin-top:18px">
+          <button class="btn ghost" id="exportBtn">Скачать accounts.json</button>
+          <button class="btn ghost" id="importBtn">Импорт</button>
+          <button class="btn ghost" id="copyBtn">Копировать JSON</button>
+          <input id="fileIn" type="file" accept="application/json,.json" class="hidden"/>
+        </div>
+        <label>ПРЕВЬЮ VAULT</label>
+        <textarea id="preview" rows="8" readonly></textarea>
+      </div>
+
+      <!-- PACK STUDIO -->
+      <div class="tab" id="tab-pack">
+        <h2>PACK STUDIO</h2>
+        <p class="lead">Последовательно соберите источник, выберите изменения, настройте runtime и опубликуйте подписанный pack на ветку <code>catalog</code>.</p>
+        <div class="pack-wizard">
+          <section class="pack-step">
+            <h3><span class="step-no">1</span>Источник</h3>
+            <p class="step-help">Выберите Flowseal для .bat стратегий, bol-van для hostlist и ipset списков, или загрузите текущий catalog.</p>
+            <div class="row">
+              <div>
+                <label>ДОВЕРЕННЫЙ РЕПОЗИТОРИЙ</label>
+                <select id="trustRepo">
+                  <option value="Flowseal/zapret-discord-youtube">Flowseal/zapret-discord-youtube</option>
+                  <option value="bol-van/zapret">bol-van/zapret (списки)</option>
+                </select>
+              </div>
+              <div style="flex:0">
+                <button class="btn" id="fetchRepoBtn">Скачать стратегии (.bat)</button>
+              </div>
+              <div style="flex:0">
+                <button class="btn ghost" id="loadCurrentCatalogBtn">Загрузить текущий catalog</button>
+              </div>
+              <div style="flex:0">
+                <button class="btn ghost" id="loadCurrentPackBtn">Загрузить pack index</button>
+              </div>
+            </div>
+          </section>
+
+          <section class="pack-step">
+            <h3><span class="step-no">2</span>Diff / выбор</h3>
+            <p class="step-help">Отметьте нужные стратегии или списки. Затем оставьте в черновике только выбранные либо отключите остальные.</p>
+            <div id="importDiff" class="empty">Сначала выберите источник</div>
+            <label>СПИСКИ В ЧЕРНОВИКЕ (ФАЙЛ: СОДЕРЖИМОЕ)</label>
+            <textarea id="draftLists" class="lists-preview" rows="7" placeholder='{"lists":{"hostlist.txt":"..."}}'></textarea>
+            <label>ЧЕРНОВИК СТРАТЕГИЙ (JSON)</label>
+            <textarea id="draftStrategies" rows="14" placeholder='{"strategies":[]}'></textarea>
+          </section>
+
+          <section class="pack-step">
+            <h3><span class="step-no">3</span>Runtime и AXON naming</h3>
+            <p class="step-help">Проверьте порты и секции runtime. Имена Flowseal автоматически приводятся к стилю AXON.</p>
+            <div class="row">
+              <div>
+                <label>ВЕРСИЯ PACK</label>
+                <input id="packVer" placeholder="6"/>
+              </div>
+              <div>
+                <label>MIN APP</label>
+                <input id="packMinApp" value="1.4.0"/>
+              </div>
+            </div>
+            <label>RUNTIME (порты / секции)</label>
+            <textarea id="runtimeJson" rows="6">{
+  "tcpPorts": ["80","443","2053","2083","2087","2096","8443"],
+  "udpPortsBase": ["443"],
+  "discordVoiceUdp": ["19294-19344","50000-50100"],
+  "enableQuic": true,
+  "enableDiscordVoice": true,
+  "enableDiscordMedia": true,
+  "enableIpset": true,
+  "quicRepeats": 6,
+  "voiceRepeats": 6
+}</textarea>
+          </section>
+
+          <section class="pack-step">
+            <h3><span class="step-no">4</span>Подпись и публикация</h3>
+            <p class="step-help">Pack подписывается HMAC. Для клиентов подпись обязательна по умолчанию.</p>
+            <div class="row">
+              <button class="btn" id="publishPackBtn">Подписать и опубликовать pack + catalog</button>
+              <button class="btn ghost" id="previewArgsBtn">Превью args (первая)</button>
+            </div>
+          </section>
+        </div>
+        <div id="packStatus" class="pack-status empty">Готово к выбору источника</div>
+      </div>
+
+      <!-- HEALTH -->
+      <div class="tab" id="tab-health">
+        <h2>ЗДОРОВЬЕ СЕТИ</h2>
+        <p class="lead">Жалобы + heat онлайн. Стратегии с массовыми fail: кандидаты на retire.</p>
+        <canvas class="chart" id="healthChart" width="1000" height="180"></canvas>
+        <label style="margin-top:16px">ПОДСКАЗКИ RETIRE</label>
+        <div id="retireHints" class="empty">Нет подсказок</div>
+        <div class="row" style="margin-top:10px">
+          <button class="btn ghost" id="refreshHealthBtn">Обновить график</button>
+          <div>
+            <label>ПОРОГ ЖАЛОБ ДЛЯ RETIRE</label>
+            <input id="retireThreshold" type="number" value="3" min="1" style="max-width:120px"/>
+          </div>
+        </div>
+      </div>
+
+      <!-- RELEASES -->
+      <div class="tab" id="tab-releases">
+        <h2>РЕЛИЗЫ (latest.json)</h2>
+        <p class="lead">Манифест обновления exe на ветке <code>catalog</code> (и зеркало на main при желании).</p>
+        <div class="row">
+          <div>
+            <label>VERSION</label>
+            <input id="relVer" placeholder="1.4.0"/>
+          </div>
+          <div>
+            <label>DOWNLOAD URL</label>
+            <input id="relUrl" placeholder="https://github.com/awkcrud/AXON/releases/..."/>
+          </div>
+        </div>
+        <label>NOTES</label>
+        <textarea id="relNotes" rows="5" placeholder="Что нового"></textarea>
+        <div class="row" style="margin-top:10px">
+          <button class="btn ghost" id="loadLatestBtn">Загрузить текущий</button>
+          <button class="btn" id="publishLatestBtn">Опубликовать latest.json</button>
+        </div>
+        <div id="relStatus" class="empty"></div>
+      </div>
+
+      <div class="ok hidden" id="status"></div>
+    </div>
+  </div>
+
+  <script>
+    const ADMIN_PACK = {"format":"axon-admin-pack-1","kdf":"pbkdf2-sha256","iter":310000,"salt":"C+dnESgXYB5NLT6f+3RU9w==","nonce":"mvTDLRDDdMtX/gUP","data":"hs4TqUE6yQR0GdPCo33/0SHuJglsnMiISSxLMz7ZPvIzcZUGfpx591Woo9uE1oQD+WSY+tjw2d1SB3D+XxwhVsug0rjkzUdX08HDLbKSBipB5vVtXdxnlrC8H940ZQpS2m2Za7yqNW+SQoO+2CoIH7PRui6Tq6RiMNcIt0Yl1wwfOApcae/hMNfTSZFZU5tMF8BEeyCRhX4JRryByQyM9jwUOc79wr26nwLhvhw=","aad":"axon-admin-pack-v1"};
+    const GH_REPO = 'awkcrud/axon-site';
+    const GH_PATH = 'auth/accounts.json';
+    const ALLOWED_REPOS = new Set(['Flowseal/zapret-discord-youtube', 'bol-van/zapret']);
+    const BIN_MAP = {
+      'tls_clienthello_www_google_com.bin': 'tls_clienthello_www_google_com.bin',
+      'tls_clienthello_4pda_to.bin': 'tls_clienthello_4pda_to.bin',
+      'quic_initial_www_google_com.bin': 'quic_initial_www_google_com.bin',
+      'stun.bin': 'stun.bin',
+      'stun2.bin': 'stun2.bin',
+    };
+    const AXON_NAME_MAP = [
+      [/^general\s*\(alt\)$/i, ['Комплексный (Alt)', 'Comprehensive (Alt)', 'Fake + Fakedsplit · 4pda']],
+      [/^general$/i, ['Комплексный', 'Comprehensive', 'Универсальный профиль AXON']],
+      [/\balt\s*2\b/i, ['Комплексный (Alt 2)', 'Comprehensive (Alt 2)', 'Fake TLS + split для YouTube и Discord']],
+      [/\balt\s*3\b/i, ['Комплексный (Alt 3)', 'Comprehensive (Alt 3)', 'Усиленный fake профиль']],
+      [/\balt\s*4\b/i, ['Комплексный (Alt 4)', 'Comprehensive (Alt 4)', 'Fakedsplit · 4pda']],
+      [/\balt\s*5\b/i, ['Комплексный (Alt 5)', 'Comprehensive (Alt 5)', 'Fake TLS для сложных сетей']],
+      [/\balt\s*6\b/i, ['Комплексный (Alt 6)', 'Comprehensive (Alt 6)', 'Разделение TLS и HTTP']],
+      [/\balt\s*7\b/i, ['Комплексный (Alt 7)', 'Comprehensive (Alt 7)', 'Расширенный DPI обход']],
+      [/\balt\s*8\b/i, ['Комплексный (Alt 8)', 'Comprehensive (Alt 8)', 'Профиль с повторениями']],
+      [/\balt\s*9\b/i, ['Комплексный (Alt 9)', 'Comprehensive (Alt 9)', 'Профиль для нестабильных сетей']],
+      [/\balt\s*10\b/i, ['Комплексный (Alt 10)', 'Comprehensive (Alt 10)', 'Усиленный TLS fake']],
+      [/\balt\s*11\b/i, ['Комплексный (Alt 11)', 'Comprehensive (Alt 11)', 'Совместимый DPI профиль']],
+      [/\balt\s*12\b/i, ['Комплексный (Alt 12)', 'Comprehensive (Alt 12)', 'Максимальный DPI профиль']],
+      [/fake.*tls.*auto|tls.*auto/i, ['Fake TLS Auto', 'Fake TLS Auto', 'Автоматический Fake TLS профиль']],
+      [/simple.*fake/i, ['Простой Fake', 'Simple Fake', 'Легкий Fake профиль']],
+      [/\bexp\b|experimental/i, ['Экспериментальный', 'Experimental', 'Экспериментальный AXON профиль']],
+    ];
+
+    let db = { accounts: [] };
+    let vaultSecret = '';
+    let ghToken = '';
+    let liveTimer = null;
+    let currentCatalog = { version: 5, strategies: [] };
+    let importCandidates = [];
+
+    const $ = (id) => document.getElementById(id);
+    const b64 = (buf) => btoa(String.fromCharCode(...new Uint8Array(buf)));
+    const fromB64 = (s) => Uint8Array.from(atob(s), c => c.charCodeAt(0));
+    const enc = new TextEncoder();
+    const dec = new TextDecoder();
+
+    document.querySelectorAll('#tabs button').forEach(btn => {
+      btn.onclick = () => {
+        document.querySelectorAll('#tabs button').forEach(b => b.classList.remove('on'));
+        document.querySelectorAll('.tab').forEach(t => t.classList.remove('on'));
+        btn.classList.add('on');
+        $('tab-' + btn.dataset.tab).classList.add('on');
+      };
+    });
+
+    async function pbkdf2Key(password, salt, iterations) {
+      const material = await crypto.subtle.importKey('raw', enc.encode(password), 'PBKDF2', false, ['deriveBits']);
+      const bits = await crypto.subtle.deriveBits({ name:'PBKDF2', salt, iterations, hash:'SHA-256' }, material, 256);
+      return crypto.subtle.importKey('raw', bits, 'AES-GCM', false, ['encrypt', 'decrypt']);
+    }
+
+    async function unlockAdminPack(password) {
+      const salt = fromB64(ADMIN_PACK.salt);
+      const nonce = fromB64(ADMIN_PACK.nonce);
+      const data = fromB64(ADMIN_PACK.data);
+      const aad = enc.encode(ADMIN_PACK.aad || 'axon-admin-pack-v1');
+      const key = await pbkdf2Key(password, salt, ADMIN_PACK.iter || 310000);
+      const plain = await crypto.subtle.decrypt({ name:'AES-GCM', iv: nonce, additionalData: aad }, key, data);
+      return JSON.parse(dec.decode(plain));
+    }
+
+    async function deriveVaultKey(secret) {
+      const material = await crypto.subtle.digest('SHA-256', enc.encode('AXON-VAULT-v1|' + secret));
+      return crypto.subtle.importKey('raw', material, 'AES-GCM', false, ['encrypt', 'decrypt']);
+    }
+
+    async function packHmacKey() {
+      const material = await crypto.subtle.digest('SHA-256', enc.encode('AXON-PACK-v1|' + vaultSecret));
+      return crypto.subtle.importKey('raw', material, { name: 'HMAC', hash: 'SHA-256' }, false, ['sign']);
+    }
+
+    async function signPackBytes(bytes) {
+      const key = await packHmacKey();
+      const sig = await crypto.subtle.sign('HMAC', key, bytes);
+      return [...new Uint8Array(sig)].map(b => b.toString(16).padStart(2, '0')).join('');
+    }
+
+    async function sha256Hex(bytes) {
+      const dig = await crypto.subtle.digest('SHA-256', bytes);
+      return [...new Uint8Array(dig)].map(b => b.toString(16).padStart(2, '0')).join('');
+    }
+
+    async function pbkdf2Hash(password, saltBytes) {
+      const key = await crypto.subtle.importKey('raw', enc.encode(password), 'PBKDF2', false, ['deriveBits']);
+      const bits = await crypto.subtle.deriveBits({ name:'PBKDF2', salt: saltBytes, iterations:120000, hash:'SHA-256' }, key, 256);
+      return b64(bits);
+    }
+
+    async function encryptVault(database, secret) {
+      const key = await deriveVaultKey(secret);
+      const nonce = crypto.getRandomValues(new Uint8Array(12));
+      const cipher = await crypto.subtle.encrypt({ name:'AES-GCM', iv: nonce }, key, enc.encode(JSON.stringify(database)));
+      return { format: 'axon-vault-1', nonce: b64(nonce), data: b64(cipher) };
+    }
+
+    async function decryptVault(obj, secret) {
+      if (!obj || obj.format !== 'axon-vault-1') {
+        if (obj && Array.isArray(obj.accounts)) return obj;
+        throw new Error('Unknown format');
+      }
+      const key = await deriveVaultKey(secret);
+      const nonce = fromB64(obj.nonce);
+      const data = fromB64(obj.data);
+      const plain = await crypto.subtle.decrypt({ name:'AES-GCM', iv: nonce }, key, data);
+      return JSON.parse(dec.decode(plain));
+    }
+
+    async function decryptPresenceBlob(obj) {
+      if (typeof obj === 'string') obj = JSON.parse(obj);
+      if (!obj || obj.format !== 'axon-presence-1') throw new Error('Not axon-presence-1');
+      const key = await deriveVaultKey(vaultSecret);
+      const nonce = fromB64(obj.nonce);
+      const data = fromB64(obj.data);
+      const aad = enc.encode(obj.aad || 'axon-presence-v1');
+      const plain = await crypto.subtle.decrypt({ name:'AES-GCM', iv: nonce, additionalData: aad }, key, data);
+      return JSON.parse(dec.decode(plain));
+    }
+
+    function fmtDur(sec) {
+      sec = Math.max(0, Number(sec) || 0);
+      const h = Math.floor(sec / 3600);
+      const m = Math.floor((sec % 3600) / 60);
+      const s = sec % 60;
+      if (h > 0) return `${h}ч ${m}м`;
+      if (m > 0) return `${m}м ${s}с`;
+      return `${s}с`;
+    }
+
+    function fmtTs(unix) {
+      if (!unix) return '-';
+      try { return new Date(unix * 1000).toLocaleString('ru-RU'); } catch { return String(unix); }
+    }
+
+    function escapeHtml(s) {
+      return String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+    }
+
+    function showStatus(msg, ok=true) {
+      const el = $('status');
+      el.className = ok ? 'ok' : 'err';
+      el.textContent = msg;
+      el.classList.remove('hidden');
+    }
+
+    function slugId(name) {
+      return String(name).toLowerCase()
+        .replace(/\.bat$/i, '')
+        .replace(/[^a-z0-9]+/g, '_')
+        .replace(/^_|_$/g, '')
+        .slice(0, 48) || 'strat';
+    }
+
+    function axonNameFor(filename) {
+      const base = String(filename).replace(/\.bat$/i, '').replace(/[_-]+/g, ' ').trim();
+      for (const [pattern, values] of AXON_NAME_MAP) {
+        if (pattern.test(base)) return { titleRu: values[0], titleEn: values[1], blurbRu: values[2] };
+      }
+      return { titleRu: base, titleEn: base, blurbRu: 'Импортированный профиль AXON' };
+    }
+
+    function tokenizeBat(text) {
+      const lines = text.replace(/\r/g, '').split('\n')
+        .map(l => l.replace(/^\s*@?rem\b.*/i, '').replace(/^\s*::.*/, ''))
+        .filter(l => !/^\s*(@?echo|@?chcp|@?cd|@?setlocal|@?endlocal|@?title|@?pause|@?call|@?if|@?goto|@?exit)\b/i.test(l));
+      const joined = lines.join(' ')
+        .replace(/\\\s*\n/g, ' ')
+        .replace(/\^"/g, '"');
+      const tokens = [];
+      const re = /"([^"]*)"|(\S+)/g;
+      let m;
+      while ((m = re.exec(joined))) tokens.push(m[1] !== undefined ? m[1] : m[2]);
+      return tokens;
+    }
+
+    function extractDpiSegments(tokens) {
+      const blocks = [[]];
+      for (const t of tokens) {
+        if (/^--new$/i.test(t)) { blocks.push([]); continue; }
+        if (!t.startsWith('--')) continue;
+        if (/^--(wf-|filter-|hostlist|ipset|pidfile|dpi-desync|ip-id)/i.test(t) || t.includes('=')) {
+          let flag = t;
+          // map bin paths
+          const eq = flag.indexOf('=');
+          if (eq > 0) {
+            const key = flag.slice(0, eq);
+            let val = flag.slice(eq + 1).replace(/^\.\\?bin\\/i, '').replace(/^bin[\\/]/i, '');
+            const base = val.split(/[/\\]/).pop();
+            if (BIN_MAP[base]) val = BIN_MAP[base];
+            else if (/\.bin$/i.test(base)) val = base;
+            flag = key + '=' + val;
+          }
+          blocks[blocks.length - 1].push(flag);
+        }
+      }
+      const dpiBlocks = blocks
+        .map(b => b.filter(x => /dpi-desync|fake-tls|fake-quic|fake-http|ip-id|split-|fooling|repeats|pattern|hostfakesplit|tlsrec/i.test(x)))
+        .filter(b => b.length > 0);
+      const core = dpiBlocks[0] || [];
+      const general = dpiBlocks[1] || dpiBlocks[0] || [];
+      return { dpiCore: core, dpiGeneral: general };
+    }
+
+    async function ghGet(path, ref) {
+      const url = `https://api.github.com/repos/${GH_REPO}/contents/${path}?ref=${ref || 'catalog'}`;
+      const r = await fetch(url, {
+        headers: { Authorization: 'Bearer ' + ghToken, Accept: 'application/vnd.github+json' }
+      });
+      if (!r.ok) throw new Error('GitHub ' + r.status + ' ' + path);
+      return r.json();
+    }
+
+    async function ghPut(path, contentB64, message, branch, sha) {
+      const body = { message, content: contentB64, branch };
+      if (sha) body.sha = sha;
+      const r = await fetch(`https://api.github.com/repos/${GH_REPO}/contents/${path}`, {
+        method: 'PUT',
+        headers: {
+          Authorization: 'Bearer ' + ghToken,
+          Accept: 'application/vnd.github+json',
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(body),
+      });
+      if (!r.ok) throw new Error(await r.text());
+      return r.json();
+    }
+
+    async function fetchRepoStrategies() {
+      const repo = $('trustRepo').value;
+      if (!ALLOWED_REPOS.has(repo)) {
+        showStatus('Репозиторий не в allowlist', false);
+        return;
+      }
+      $('importDiff').textContent = 'Загрузка…';
+      const treeUrl = `https://api.github.com/repos/${repo}/git/trees/main?recursive=1`;
+      let tree;
+      let treeRef = 'main';
+      try {
+        tree = await fetch(treeUrl, {
+          headers: { Authorization: 'Bearer ' + ghToken, Accept: 'application/vnd.github+json' }
+        }).then(async r => {
+          if (!r.ok) {
+            // try master
+            treeRef = 'master';
+            const r2 = await fetch(`https://api.github.com/repos/${repo}/git/trees/master?recursive=1`, {
+              headers: { Authorization: 'Bearer ' + ghToken, Accept: 'application/vnd.github+json' }
+            });
+            if (!r2.ok) throw new Error('HTTP ' + r.status);
+            return r2.json();
+          }
+          return r.json();
+        });
+      } catch (e) {
+        $('importDiff').textContent = 'Ошибка: ' + e.message;
+        return;
+      }
+
+      if (repo === 'bol-van/zapret') {
+        await fetchBolVanLists(repo, tree, treeRef);
+        return;
+      }
+
+      const bats = (tree.tree || []).filter(t =>
+        t.type === 'blob' && /\.bat$/i.test(t.path) &&
+        /(general|alt|youtube|discord)/i.test(t.path) &&
+        !/service|blockcheck|game|update/i.test(t.path)
+      ).slice(0, 40);
+
+      importCandidates = [];
+      for (const f of bats) {
+        try {
+          const rawUrl = `https://raw.githubusercontent.com/${repo}/${treeRef}/${f.path}`;
+          const text = await fetch(rawUrl).then(r => r.ok ? r.text() : '');
+          if (!text || !/--dpi-desync/i.test(text)) continue;
+          const tokens = tokenizeBat(text);
+          const seg = extractDpiSegments(tokens);
+          if (!seg.dpiCore.length) continue;
+          const id = slugId(f.path.split('/').pop());
+          const names = axonNameFor(f.path.split('/').pop());
+          importCandidates.push({
+            id,
+            titleRu: names.titleRu,
+            titleEn: names.titleEn,
+            blurbRu: names.blurbRu,
+            blurbEn: 'Imported from ' + repo,
+            youtube: true,
+            discord: true,
+            quic: true,
+            ytProfile: 'alt',
+            dpiCore: seg.dpiCore,
+            dpiGeneral: seg.dpiGeneral,
+            tags: ['import', 'flowseal'],
+            enabled: true,
+            priority: 80,
+            source: { repo, file: f.path },
+            _selected: true,
+            _status: 'new',
+          });
+        } catch { /* skip file */ }
+      }
+
+      // mark vs current catalog
+      const byId = Object.fromEntries((currentCatalog.strategies || []).map(s => [s.id, s]));
+      for (const c of importCandidates) {
+        if (byId[c.id]) {
+          const same = JSON.stringify(byId[c.id].dpiCore || []) === JSON.stringify(c.dpiCore);
+          c._status = same ? 'same' : 'chg';
+        } else c._status = 'new';
+      }
+
+      renderImportDiff();
+      showStatus(`Найдено кандидатов: ${importCandidates.length}`);
+    }
+
+    async function fetchBolVanLists(repo, tree, treeRef) {
+      const files = (tree.tree || []).filter(t => {
+        if (t.type !== 'blob') return false;
+        const path = String(t.path || '');
+        return /^ipset\//i.test(path) && (/\.(txt|txt\.default)$/i.test(path) || /(^|\/)(get|update|download|list).*\.sh$/i.test(path));
+      }).slice(0, 80);
+      const lists = {};
+      const scripts = files.filter(f => /\.sh$/i.test(f.path));
+      const ref = treeRef || 'master';
+      for (const f of files) {
+        if (!/\.(txt|txt\.default)$/i.test(f.path)) continue;
+        try {
+          const rawUrl = `https://raw.githubusercontent.com/${repo}/${ref}/${f.path}`;
+          const text = await fetch(rawUrl).then(r => r.ok ? r.text() : '');
+          if (text.trim()) lists[f.path.replace(/^ipset\//i, '')] = text;
+        } catch { /* skip unavailable list */ }
+      }
+      const commonPaths = ['ipset/zapret-hosts-user.txt', 'ipset/zapret-hosts-user.txt.default', 'ipset/zapret-ip-user.txt', 'ipset/zapret-ip-user.txt.default'];
+      for (const path of commonPaths) {
+        const name = path.replace(/^ipset\//, '');
+        if (lists[name]) continue;
+        try {
+          const text = await fetch(`https://raw.githubusercontent.com/${repo}/${ref}/${path}`).then(r => r.ok ? r.text() : '');
+          if (text.trim()) lists[name] = text;
+        } catch { /* optional raw list */ }
+      }
+      const existing = (() => {
+        try { return JSON.parse($('draftLists').value || '{}').lists || {}; } catch { return {}; }
+      })();
+      $('draftLists').value = JSON.stringify({ lists: { ...existing, ...lists } }, null, 2);
+      importCandidates = Object.keys(lists).map((file, i) => ({
+        id: file, titleRu: file, titleEn: file, blurbRu: 'Список bol-van/zapret',
+        source: { repo, file: 'ipset/' + file }, _selected: true, _status: 'list', _list: true, _index: i,
+      }));
+      renderImportDiff();
+      showStatus(`Списки найдены: ${Object.keys(lists).length}` + (scripts.length ? ` · скриптов источника: ${scripts.length}` : ''));
+    }
+
+    function renderImportDiff() {
+      const box = $('importDiff');
+      if (!importCandidates.length) {
+        box.className = 'empty';
+        box.textContent = 'Нет кандидатов';
+        return;
+      }
+      box.className = '';
+      box.innerHTML = importCandidates.map((c, i) => {
+        const cls = c._status === 'new' ? 'diff-new' : c._status === 'chg' ? 'diff-chg' : '';
+        const label = c._status === 'list' ? 'СПИСОК' : c._status === 'new' ? 'НОВАЯ' : c._status === 'chg' ? 'ИЗМЕНЕНА' : 'БЕЗ ИЗМЕНЕНИЙ';
+        return `<label class="chk ${cls}">
+          <input type="checkbox" data-imp="${i}" ${c._selected ? 'checked' : ''}/>
+          <span><span class="tag">${label}</span><b>${escapeHtml(c.id)}</b> · ${escapeHtml(c.titleRu)}
+          <div class="hw">${escapeHtml((c.source && c.source.file) || '')}${c._list ? ' · список для lists/' : ' · core ' + c.dpiCore.length + ' flags'}</div></span>
+        </label>`;
+      }).join('') +
+      `<div class="row" style="margin-top:10px">
+        <button class="btn ghost" id="mergeSelectedBtn">Слить выбранные в черновик</button>
+        <button class="btn ghost" id="keepSelectedBtn">Оставить только выбранные / включённые</button>
+        <button class="btn ghost" id="disableUnselectedBtn">Отключить невыбранные (enabled:false)</button>
+        <button class="btn ghost" id="selectAllImp">Все</button>
+        <button class="btn ghost" id="selectNoneImp">Снять</button>
+      </div>`;
+
+      box.querySelectorAll('[data-imp]').forEach(chk => {
+        chk.onchange = () => { importCandidates[+chk.dataset.imp]._selected = chk.checked; };
+      });
+      $('selectAllImp').onclick = () => {
+        importCandidates.forEach(c => c._selected = true);
+        renderImportDiff();
+      };
+      $('selectNoneImp').onclick = () => {
+        importCandidates.forEach(c => c._selected = false);
+        renderImportDiff();
+      };
+      $('mergeSelectedBtn').onclick = mergeSelectedIntoDraft;
+      $('keepSelectedBtn').onclick = () => applySelectionToDraft('keep');
+      $('disableUnselectedBtn').onclick = () => applySelectionToDraft('disable');
+    }
+
+    function mergeSelectedIntoDraft() {
+      let draft;
+      try { draft = JSON.parse($('draftStrategies').value || '{"strategies":[]}'); }
+      catch { draft = { strategies: [] }; }
+      if (!Array.isArray(draft.strategies)) draft.strategies = [];
+      const map = new Map(draft.strategies.map(s => [s.id, s]));
+      for (const c of importCandidates.filter(x => x._selected && !x._list)) {
+        const { _selected, _status, ...row } = c;
+        map.set(row.id, row);
+      }
+      // keep existing catalog rows not overwritten
+      for (const s of (currentCatalog.strategies || [])) {
+        if (!map.has(s.id)) map.set(s.id, s);
+      }
+      draft.strategies = [...map.values()];
+      draft.version = Number($('packVer').value) || (currentCatalog.version || 5) + 1;
+      draft.updated = new Date().toISOString().slice(0, 10);
+      $('draftStrategies').value = JSON.stringify(draft, null, 2);
+      $('packVer').value = String(draft.version);
+      showStatus(`Черновик: ${draft.strategies.length} стратегий`);
+    }
+
+    function applySelectionToDraft(mode) {
+      let draft;
+      try { draft = JSON.parse($('draftStrategies').value || '{"strategies":[]}'); }
+      catch { showStatus('Черновик стратегий содержит неверный JSON', false); return; }
+      const selected = new Set(importCandidates.filter(c => c._selected && !c._list).map(c => c.id));
+      if (!selected.size) { showStatus('Сначала отметьте хотя бы одну стратегию', false); return; }
+      const sourceIds = new Set(importCandidates.filter(c => !c._list).map(c => c.id));
+      if (mode === 'keep') {
+        draft.strategies = (draft.strategies || []).filter(s => !sourceIds.has(s.id) || selected.has(s.id));
+        showStatus('В черновике оставлены выбранные стратегии');
+      } else {
+        for (const s of (draft.strategies || [])) {
+          if (sourceIds.has(s.id) && !selected.has(s.id)) s.enabled = false;
+        }
+        showStatus('Невыбранные стратегии отключены');
+      }
+      $('draftStrategies').value = JSON.stringify(draft, null, 2);
+    }
+
+    async function loadCurrentCatalog() {
+      try {
+        const j = await fetch(
+          'https://raw.githubusercontent.com/awkcrud/axon-site/catalog/strategies/catalog.json?t=' + Date.now(),
+          { cache: 'no-store' }
+        ).then(r => r.json());
+        currentCatalog = j;
+        $('draftStrategies').value = JSON.stringify(j, null, 2);
+        $('packVer').value = String((j.version || 5) + 1);
+        if ($('dCatalog')) $('dCatalog').textContent = 'v' + (j.version || '?') + ' · ' + ((j.strategies || []).length);
+        showStatus('Каталог загружен');
+      } catch (e) {
+        showStatus('Не удалось загрузить catalog: ' + e.message, false);
+      }
+    }
+
+    async function loadCurrentPack() {
+      try {
+        const j = await fetch(
+          'https://raw.githubusercontent.com/awkcrud/axon-site/catalog/packs/index.json?t=' + Date.now(),
+          { cache: 'no-store' }
+        ).then(r => r.ok ? r.json() : null);
+        if (!j) {
+          $('dPack').textContent = 'нет';
+          showStatus('packs/index.json пока нет: будет создан при публикации', true);
+          return;
+        }
+        const p = (j.packs || [])[0];
+        $('dPack').textContent = p ? `${p.id} v${p.version}` : '-';
+        if (p?.version) $('packVer').value = String(Number(p.version) + 1 || p.version);
+        showStatus('Pack index загружен');
+      } catch {
+        $('dPack').textContent = '-';
+      }
+    }
+
+    function parseRuntime() {
+      try {
+        const raw = $('runtimeJson').value.trim();
+        const obj = JSON.parse(raw.startsWith('{') ? raw : '{' + raw + '}');
+        return obj;
+      } catch {
+        return {
+          tcpPorts: ["80","443","2053","2083","2087","2096","8443"],
+          enableQuic: true, enableDiscordVoice: true, enableDiscordMedia: true, enableIpset: true,
+          quicRepeats: 6, voiceRepeats: 6,
+        };
+      }
+    }
+
+    function parseDraftLists() {
+      try {
+        const parsed = JSON.parse($('draftLists').value || '{"lists":{}}');
+        if (!parsed || typeof parsed.lists !== 'object' || Array.isArray(parsed.lists)) throw new Error();
+        return parsed.lists;
+      } catch {
+        throw new Error('Черновик списков содержит неверный JSON');
+      }
+    }
+
+    async function publishPack() {
+      const st = $('packStatus');
+      st.className = 'empty';
+      st.textContent = 'Сборка…';
+      try {
+        let draft = JSON.parse($('draftStrategies').value);
+        if (!Array.isArray(draft.strategies) || !draft.strategies.length)
+          throw new Error('Черновик пуст');
+        const ver = String($('packVer').value || draft.version || '1');
+        draft.version = Number(ver) || draft.version || 1;
+        draft.updated = new Date().toISOString().slice(0, 10);
+        draft.note = draft.note || 'AXON pack publish';
+
+        const runtime = parseRuntime();
+        const lists = parseDraftLists();
+        const probe = {
+          youtubeUrls: ["https://www.youtube.com/generate_204","https://i.ytimg.com/generate_204"],
+          discordUrls: ["https://discord.com","https://cdn.discordapp.com/embed/avatars/0.png"],
+          timeoutSec: 6, settleMs: 2200,
+        };
+        const manifest = {
+          id: 'axon-stable',
+          version: ver,
+          channel: 'stable',
+          created: new Date().toISOString(),
+          minAppVersion: $('packMinApp').value || '1.4.0',
+        };
+
+        const zip = new JSZip();
+        zip.file('manifest.json', JSON.stringify(manifest, null, 2));
+        zip.file('strategies.json', JSON.stringify({ strategies: draft.strategies }, null, 2));
+        zip.file('runtime.json', JSON.stringify(runtime, null, 2));
+        zip.file('probe.json', JSON.stringify(probe, null, 2));
+        for (const [file, content] of Object.entries(lists)) {
+          const safeName = String(file).replace(/\\/g, '/').replace(/^\/+/, '');
+          if (!safeName || safeName.includes('..')) throw new Error('Недопустимое имя списка: ' + file);
+          zip.file('lists/' + safeName, String(content));
+        }
+        const zipBytes = await zip.generateAsync({ type: 'uint8array' });
+        const hash = await sha256Hex(zipBytes);
+        const signature = await signPackBytes(zipBytes);
+        const packPath = `packs/axon-stable-v${ver}.axonpack`;
+
+        // publish pack binary
+        let sha;
+        try {
+          const cur = await ghGet(packPath, 'catalog');
+          sha = cur.sha;
+        } catch { /* new file */ }
+        let bin = '';
+        for (let i = 0; i < zipBytes.length; i++) bin += String.fromCharCode(zipBytes[i]);
+        const b64content = btoa(bin);
+
+        await ghPut(packPath, b64content, `chore(pack): axon-stable v${ver}`, 'catalog', sha);
+
+        const index = {
+          packs: [{
+            id: 'axon-stable',
+            version: ver,
+            channel: 'stable',
+            url: packPath,
+            sha256: hash,
+            signature,
+            signatureRequired: true,
+            minAppVersion: manifest.minAppVersion,
+            changelog: draft.note,
+          }],
+        };
+        let indexSha;
+        try { indexSha = (await ghGet('packs/index.json', 'catalog')).sha; } catch {}
+        await ghPut(
+          'packs/index.json',
+          btoa(unescape(encodeURIComponent(JSON.stringify(index, null, 2)))),
+          `chore(pack): index v${ver}`,
+          'catalog',
+          indexSha
+        );
+
+        // legacy catalog mirror (strip heavy fields ok to keep)
+        const catalogOut = {
+          version: draft.version,
+          updated: draft.updated,
+          note: draft.note,
+          strategies: draft.strategies.map(s => ({
+            id: s.id,
+            title: s.titleEn || s.titleRu || s.id,
+            titleRu: s.titleRu,
+            titleEn: s.titleEn,
+            blurbRu: s.blurbRu,
+            blurbEn: s.blurbEn,
+            youtube: s.youtube !== false,
+            discord: s.discord !== false,
+            quic: !!s.quic,
+            ytProfile: s.ytProfile || 'alt',
+            dpiCore: s.dpiCore,
+            dpiGeneral: s.dpiGeneral,
+            tags: s.tags,
+            enabled: s.enabled !== false,
+            priority: s.priority ?? 100,
+            source: s.source,
+          })),
+        };
+        let catSha;
+        try { catSha = (await ghGet('strategies/catalog.json', 'catalog')).sha; } catch {}
+        await ghPut(
+          'strategies/catalog.json',
+          btoa(unescape(encodeURIComponent(JSON.stringify(catalogOut, null, 2)))),
+          `chore(catalog): v${catalogOut.version} via Pack Studio`,
+          'catalog',
+          catSha
+        );
+
+        currentCatalog = catalogOut;
+        $('dPack').textContent = `axon-stable v${ver}`;
+        $('dCatalog').textContent = 'v' + catalogOut.version + ' · ' + catalogOut.strategies.length;
+        st.className = 'ok';
+        st.textContent = `Опубликовано pack v${ver} · sha256 ${hash.slice(0, 12)}… · signature ok`;
+        showStatus('Pack и catalog опубликованы на ветку catalog');
+      } catch (e) {
+        st.className = 'err';
+        st.textContent = String(e.message || e);
+        showStatus('Публикация pack failed: ' + (e.message || e), false);
+      }
+    }
+
+    function previewFirstArgs() {
+      try {
+        const draft = JSON.parse($('draftStrategies').value);
+        const s = (draft.strategies || [])[0];
+        if (!s) throw new Error('пусто');
+        const core = (s.dpiCore || []).join(' \\\n  ');
+        alert(`id=${s.id}\n\ndpiCore:\n  ${core || '(fallback ytProfile=' + (s.ytProfile||'alt') + ')'}`);
+      } catch (e) {
+        showStatus(String(e.message || e), false);
+      }
+    }
+
+    // live / reports (RU)
+    async function loadLive() {
+      const box = $('live');
+      box.className = 'empty';
+      box.textContent = 'Загрузка…';
+      try {
+        const url = `https://api.github.com/repos/${GH_REPO}/contents/auth/presence?ref=presence`;
+        const list = await fetch(url, {
+          headers: { Authorization: 'Bearer ' + ghToken, Accept: 'application/vnd.github+json' }
+        }).then(async r => {
+          if (r.status === 404) return [];
+          if (!r.ok) throw new Error('HTTP ' + r.status);
+          return r.json();
+        });
+        const files = (Array.isArray(list) ? list : []).filter(f => f.type === 'file' && /\.json$/i.test(f.name));
+        const rows = [];
+        const now = Math.floor(Date.now() / 1000);
+        for (const f of files) {
+          try {
+            const meta = await fetch(f.url, {
+              headers: { Authorization: 'Bearer ' + ghToken, Accept: 'application/vnd.github+json' }
+            }).then(r => r.json());
+            const raw = dec.decode(fromB64((meta.content || '').replace(/\n/g, '')));
+            const payload = await decryptPresenceBlob(JSON.parse(raw));
+            const last = Number(payload.lastSeen) || 0;
+            const stale = payload.online && (now - last > 120);
+            rows.push({
+              ...payload,
+              online: !!payload.online && !stale,
+              _stale: stale,
+              _file: f.name,
+              _sha: meta.sha,
+              _path: f.path || ('auth/presence/' + f.name),
+            });
+          } catch (e) {
+            rows.push({ user: f.name, online: false, strategy: '-', sessionSec: 0, _err: String(e.message || e), _file: f.name });
+          }
+        }
+
+        const showAll = !!($('showAllDevices') && $('showAllDevices').checked);
+        let view = rows.filter(r => !r._err);
+        if (!showAll) {
+          const byUser = new Map();
+          for (const p of view) {
+            const key = String(p.user || '').trim().toLowerCase() || p._file;
+            const prev = byUser.get(key);
+            if (!prev) { byUser.set(key, p); continue; }
+            const score = (x) => (x.online ? 1e12 : 0) + (Number(x.lastSeen) || 0);
+            if (score(p) >= score(prev)) byUser.set(key, p);
+          }
+          view = [...byUser.values()];
+          const counts = {};
+          for (const r of rows) {
+            if (r._err) continue;
+            const k = String(r.user || '').trim().toLowerCase() || r._file;
+            counts[k] = (counts[k] || 0) + 1;
+          }
+          for (const p of view) {
+            const k = String(p.user || '').trim().toLowerCase() || p._file;
+            p._devices = counts[k] || 1;
+          }
+        }
+
+        view.sort((a, b) => (b.online === a.online ? 0 : b.online ? 1 : -1) || String(a.user).localeCompare(String(b.user)));
+        const errRows = rows.filter(r => r._err);
+        const onlineN = view.filter(p => p.online).length;
+        if ($('dOnline')) $('dOnline').textContent = String(onlineN);
+        renderHeat(view.filter(p => p.online));
+        updateHealthChart(view);
+        updateRetireHints();
+
+        if (!view.length && !errRows.length) {
+          box.textContent = 'Пока нет сессий';
+          return;
+        }
+        box.className = '';
+        box.innerHTML = `<table><thead><tr>
+          <th>СТАТУС</th><th>ЮЗЕР</th><th>СТРАТЕГИЯ</th><th>ENGINE</th><th>СЕССИЯ</th><th>ПОСЛЕДНИЙ</th>
+        </tr></thead><tbody>` + view.map(p => {
+          const status = p.online
+            ? `<span class="dot on"></span>онлайн`
+            : `<span class="dot off"></span>${p._stale ? 'stale' : 'оффлайн'}`;
+          const sess = p.online
+            ? fmtDur(Math.max(0, now - (Number(p.startedAt) || now)))
+            : fmtDur(p.sessionSec);
+          const when = p.online
+            ? `seen ${fmtTs(p.lastSeen)}`
+            : `stop ${fmtTs(p.stoppedAt || p.lastSeen)}`;
+          const devices = p._devices > 1 ? ` · ${p._devices} устр.` : '';
+          return `<tr>
+            <td>${status}</td>
+            <td>${escapeHtml(p.user || '')}<div class="hw">${escapeHtml((p.hwid || '').slice(0, 16))}… · app ${escapeHtml(String(p.app || ''))}${devices}</div></td>
+            <td>${escapeHtml(p.strategy || '-')}</td>
+            <td>${p.engine ? 'ON' : 'off'}</td>
+            <td>${escapeHtml(sess)}</td>
+            <td class="hw">${escapeHtml(when)}</td>
+          </tr>`;
+        }).join('') + errRows.map(p =>
+          `<tr><td colspan="6" class="hw">${escapeHtml(p._file)} · ${escapeHtml(p._err)}</td></tr>`
+        ).join('') + `</tbody></table>`;
+
+        window.__liveRows = rows;
+      } catch (e) {
+        box.textContent = 'Ошибка live: ' + (e.message || e);
+      }
+    }
+
+    function renderHeat(onlineRows) {
+      const box = $('heat');
+      if (!box) return;
+      const counts = {};
+      for (const p of onlineRows || []) {
+        const s = String(p.strategy || '-').trim() || '-';
+        counts[s] = (counts[s] || 0) + 1;
+      }
+      const entries = Object.entries(counts).sort((a, b) => b[1] - a[1]);
+      window.__heat = entries;
+      if (!entries.length) {
+        box.className = 'empty';
+        box.textContent = 'Нет онлайн-сессий';
+        return;
+      }
+      const max = entries[0][1] || 1;
+      box.className = 'heat';
+      box.innerHTML = entries.map(([name, n]) => {
+        const pct = Math.round((n / max) * 100);
+        return `<div class="bar" style="--p:${pct}%">${escapeHtml(name)} · ${n}</div>`;
+      }).join('');
+    }
+
+    function updateHealthChart(view) {
+      const canvas = $('healthChart');
+      if (!canvas) return;
+      const ctx = canvas.getContext('2d');
+      const w = canvas.width, h = canvas.height;
+      ctx.fillStyle = '#0c0c0c';
+      ctx.fillRect(0, 0, w, h);
+      const heat = window.__heat || [];
+      const reports = window.__reportCounts || {};
+      const ids = [...new Set([...heat.map(x => x[0]), ...Object.keys(reports)])].slice(0, 16);
+      if (!ids.length) {
+        ctx.fillStyle = '#555';
+        ctx.font = '12px Consolas';
+        ctx.fillText('Нет данных для графика', 20, h / 2);
+        return;
+      }
+      const maxH = Math.max(1, ...ids.map(id => (heat.find(x => x[0] === id)?.[1] || 0) + (reports[id] || 0)));
+      const barW = Math.max(20, (w - 40) / ids.length - 8);
+      ids.forEach((id, i) => {
+        const online = heat.find(x => x[0] === id)?.[1] || 0;
+        const rep = reports[id] || 0;
+        const x = 20 + i * (barW + 8);
+        const oh = (online / maxH) * (h - 40);
+        const rh = (rep / maxH) * (h - 40);
+        ctx.fillStyle = 'rgba(197,255,58,0.7)';
+        ctx.fillRect(x, h - 24 - oh, barW * 0.55, oh);
+        ctx.fillStyle = 'rgba(255,90,90,0.7)';
+        ctx.fillRect(x + barW * 0.55, h - 24 - rh, barW * 0.45, rh);
+        ctx.fillStyle = '#777';
+        ctx.font = '9px Consolas';
+        ctx.save();
+        ctx.translate(x + barW / 2, h - 8);
+        ctx.rotate(-0.4);
+        ctx.fillText(String(id).slice(0, 10), 0, 0);
+        ctx.restore();
+      });
+      ctx.fillStyle = '#888';
+      ctx.font = '10px Consolas';
+      ctx.fillText('зелёный = онлайн · красный = жалобы', 20, 16);
+    }
+
+    function updateRetireHints() {
+      const box = $('retireHints');
+      if (!box) return;
+      const thr = Number($('retireThreshold')?.value) || 3;
+      const reports = window.__reportCounts || {};
+      const bad = Object.entries(reports).filter(([, n]) => n >= thr).sort((a, b) => b[1] - a[1]);
+      if (!bad.length) {
+        box.className = 'empty';
+        box.textContent = 'Нет кандидатов на retire (порог ' + thr + ')';
+        return;
+      }
+      box.className = '';
+      box.innerHTML = `<table><thead><tr><th>СТРАТЕГИЯ</th><th>ЖАЛОБ</th><th></th></tr></thead><tbody>` +
+        bad.map(([id, n]) => `<tr>
+          <td class="diff-del">${escapeHtml(id)}</td>
+          <td>${n}</td>
+          <td><button class="btn danger" data-retire="${escapeHtml(id)}">Пометить enabled:false в черновике</button></td>
+        </tr>`).join('') + `</tbody></table>`;
+      box.querySelectorAll('[data-retire]').forEach(btn => {
+        btn.onclick = () => {
+          try {
+            const draft = JSON.parse($('draftStrategies').value || '{"strategies":[]}');
+            const s = (draft.strategies || []).find(x => x.id === btn.dataset.retire);
+            if (s) { s.enabled = false; s.priority = 0; }
+            $('draftStrategies').value = JSON.stringify(draft, null, 2);
+            showStatus('В черновике: ' + btn.dataset.retire + ' → enabled:false');
+            document.querySelector('[data-tab="pack"]').click();
+          } catch (e) {
+            showStatus(String(e.message || e), false);
+          }
+        };
+      });
+    }
+
+    async function loadCatalogMeta() {
+      try {
+        const j = await fetch(
+          'https://raw.githubusercontent.com/awkcrud/axon-site/catalog/strategies/catalog.json',
+          { cache: 'no-store' }
+        ).then(r => r.json());
+        currentCatalog = j;
+        if ($('dCatalog')) $('dCatalog').textContent = 'v' + (j.version || '?') + ' · ' + ((j.strategies || []).length);
+      } catch {
+        if ($('dCatalog')) $('dCatalog').textContent = '-';
+      }
+      await loadCurrentPack();
+    }
+
+    async function loadReports() {
+      const box = $('reports');
+      if (!box) return;
+      box.className = 'empty';
+      box.textContent = 'Загрузка…';
+      try {
+        const url = `https://api.github.com/repos/${GH_REPO}/issues?state=open&per_page=50&sort=created&direction=desc`;
+        const issues = await fetch(url, {
+          headers: { Authorization: 'Bearer ' + ghToken, Accept: 'application/vnd.github+json' }
+        }).then(r => {
+          if (!r.ok) throw new Error('HTTP ' + r.status);
+          return r.json();
+        });
+        const rows = (Array.isArray(issues) ? issues : []).filter(i =>
+          String(i.title || '').includes('[axon-strategy]') ||
+          String(i.body || '').includes('axon-strategy-report')
+        );
+        if ($('dReports')) $('dReports').textContent = String(rows.length);
+        const counts = {};
+        for (const issue of rows) {
+          const body = issue.body || '';
+          const strat = ((body.match(/\*\*Strategy:\*\*\s*`?([^`\n]+)`?/i) || [])[1]
+            || (issue.title || '').replace(/^\[axon-strategy\]\s*/i, '')).trim();
+          if (strat) counts[strat] = (counts[strat] || 0) + 1;
+        }
+        window.__reportCounts = counts;
+        updateRetireHints();
+        updateHealthChart(window.__liveRows || []);
+
+        if (!rows.length) {
+          box.textContent = 'Нет открытых жалоб';
+          return;
+        }
+        box.className = '';
+        box.innerHTML = `<table><thead><tr><th>СТРАТЕГИЯ</th><th>ЮЗЕР / МЕТА</th><th></th></tr></thead><tbody>` +
+          rows.map(issue => {
+            const body = issue.body || '';
+            const strat = (body.match(/\*\*Strategy:\*\*\s*`?([^`\n]+)`?/i) || [])[1]
+              || (issue.title || '').replace(/^\[axon-strategy\]\s*/i, '');
+            const user = (body.match(/\*\*User:\*\*\s*`?([^`\n]+)`?/i) || [])[1] || '-';
+            const app = (body.match(/\*\*App:\*\*\s*([^\n]+)/i) || [])[1] || '';
+            const when = (body.match(/\*\*UTC:\*\*\s*([^\n]+)/i) || [])[1] || '';
+            return `<tr>
+              <td>${escapeHtml(strat.trim())}<div class="hw">#${issue.number}</div></td>
+              <td>${escapeHtml(user.trim())}<div class="hw">${escapeHtml(app.trim())}${when ? ' · ' + escapeHtml(when.trim()) : ''}</div></td>
+              <td>
+                <a class="btn ghost" href="${escapeHtml(issue.html_url)}" target="_blank" rel="noopener">Открыть</a>
+                <button class="btn danger" data-close-report="${issue.number}" style="margin-top:6px">Закрыть</button>
+              </td>
+            </tr>`;
+          }).join('') + `</tbody></table>`;
+        box.querySelectorAll('[data-close-report]').forEach(btn => {
+          btn.onclick = async () => {
+            try {
+              await closeIssue(+btn.dataset.closeReport);
+              showStatus('Закрыта жалоба #' + btn.dataset.closeReport);
+              await loadReports();
+            } catch (e) {
+              showStatus(String(e.message || e), false);
+            }
+          };
+        });
+      } catch (e) {
+        box.textContent = 'Ошибка жалоб: ' + (e.message || e);
+      }
+    }
+
+    async function purgeOfflineLive() {
+      const rows = window.__liveRows || [];
+      const now = Math.floor(Date.now() / 1000);
+      const victims = rows.filter(p => {
+        if (p._err || !p._path || !p._sha) return false;
+        if (p.online) return false;
+        const last = Number(p.lastSeen) || Number(p.stoppedAt) || 0;
+        return !last || (now - last > 7200);
+      });
+      if (!victims.length) {
+        showStatus('Нечего чистить (оффлайн > 2ч)', true);
+        return;
+      }
+      if (!confirm(`Удалить ${victims.length} оффлайн presence-файл(ов)?`)) return;
+      let ok = 0, fail = 0;
+      for (const p of victims) {
+        try {
+          const delUrl = `https://api.github.com/repos/${GH_REPO}/contents/${p._path}`;
+          const r = await fetch(delUrl, {
+            method: 'DELETE',
+            headers: {
+              Authorization: 'Bearer ' + ghToken,
+              Accept: 'application/vnd.github+json',
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+              message: `chore(presence): purge offline ${p.user || p._file}`,
+              sha: p._sha,
+              branch: 'presence',
+            }),
+          });
+          if (r.ok) ok++; else fail++;
+        } catch { fail++; }
+      }
+      showStatus(`Удалено ${ok}` + (fail ? `, ошибок ${fail}` : ''), fail === 0);
+      await loadLive();
+    }
+
+    async function decryptBindBlob(obj) {
+      if (typeof obj === 'string') obj = JSON.parse(obj);
+      if (!obj || obj.format !== 'axon-bind-1') throw new Error('Not axon-bind-1');
+      const key = await deriveVaultKey(vaultSecret);
+      const nonce = fromB64(obj.nonce);
+      const data = fromB64(obj.data);
+      const aad = enc.encode(obj.aad || 'axon-bind-v1');
+      const plain = await crypto.subtle.decrypt({ name:'AES-GCM', iv: nonce, additionalData: aad }, key, data);
+      return JSON.parse(dec.decode(plain));
+    }
+
+    function extractBindJson(body) {
+      if (!body) return null;
+      const m = body.match(/```(?:json)?\s*([\s\S]*?)```/);
+      const raw = (m ? m[1] : body).trim();
+      const start = raw.indexOf('{');
+      const end = raw.lastIndexOf('}');
+      if (start < 0 || end <= start) return null;
+      return JSON.parse(raw.slice(start, end + 1));
+    }
+
+    function render() {
+      if ($('dAccounts')) $('dAccounts').textContent = String((db.accounts || []).length);
+      const box = $('list');
+      if (!db.accounts.length) {
+        box.className = 'empty';
+        box.textContent = 'Пусто';
+      } else {
+        box.className = '';
+        box.innerHTML = `<table><thead><tr><th>ЮЗЕР</th><th>HWID</th><th></th></tr></thead><tbody>` +
+          db.accounts.map((a,i) => {
+            const hw = (a.hwids || []).join('\n') || '-';
+            return `<tr>
+              <td>${escapeHtml(a.user)}</td>
+              <td>
+                <div class="hw">${escapeHtml(hw)}</div>
+                <div class="row" style="margin-top:8px">
+                  <input data-hw="${i}" placeholder="добавить HWID" style="min-width:220px"/>
+                  <button class="btn ghost" data-bind="${i}">Привязать</button>
+                  <button class="btn ghost" data-clear="${i}">Очистить HWID</button>
+                </div>
+              </td>
+              <td><button class="btn danger" data-del="${i}">Удалить</button></td>
+            </tr>`;
+          }).join('') + `</tbody></table>`;
+
+        box.querySelectorAll('[data-del]').forEach(btn => {
+          btn.onclick = () => { db.accounts.splice(+btn.dataset.del, 1); render(); };
+        });
+        box.querySelectorAll('[data-bind]').forEach(btn => {
+          btn.onclick = () => {
+            const i = +btn.dataset.bind;
+            const input = box.querySelector(`input[data-hw="${i}"]`);
+            const val = (input?.value || '').trim();
+            if (!val) { showStatus('Сначала вставь HWID', false); return; }
+            const list = db.accounts[i].hwids || (db.accounts[i].hwids = []);
+            if (!list.includes(val)) list.push(val);
+            input.value = '';
+            render();
+            showStatus(`HWID привязан к ${db.accounts[i].user}`);
+          };
+        });
+        box.querySelectorAll('[data-clear]').forEach(btn => {
+          btn.onclick = () => { db.accounts[+btn.dataset.clear].hwids = []; render(); showStatus('HWID очищены'); };
+        });
+      }
+      refreshPreview();
+    }
+
+    async function refreshPreview() {
+      try {
+        const vault = await encryptVault(db, vaultSecret);
+        $('preview').value = JSON.stringify(vault, null, 2);
+      } catch (e) {
+        $('preview').value = String(e);
+      }
+    }
+
+    async function publishAccounts() {
+      if (!ghToken) throw new Error('Нет токена в pack');
+      const vault = await encryptVault(db, vaultSecret);
+      const content = btoa(unescape(encodeURIComponent(JSON.stringify(vault, null, 2))));
+      const metaUrl = `https://api.github.com/repos/${GH_REPO}/contents/${GH_PATH}`;
+      let sha;
+      const cur = await fetch(metaUrl, {
+        headers: { Authorization: 'Bearer ' + ghToken, Accept: 'application/vnd.github+json' }
+      }).then(r => r.ok ? r.json() : null);
+      if (cur?.sha) sha = cur.sha;
+      const body = { message: 'chore(auth): update accounts', content, branch: 'main' };
+      if (sha) body.sha = sha;
+      const res = await fetch(metaUrl, {
+        method: 'PUT',
+        headers: {
+          Authorization: 'Bearer ' + ghToken,
+          Accept: 'application/vnd.github+json',
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(body),
+      });
+      if (!res.ok) throw new Error(await res.text());
+    }
+
+    async function loadPending() {
+      const box = $('pending');
+      box.className = 'empty';
+      box.textContent = 'Загрузка…';
+      try {
+        const url = `https://api.github.com/repos/${GH_REPO}/issues?state=open&per_page=50&sort=created&direction=desc`;
+        const issues = await fetch(url, {
+          headers: { Authorization: 'Bearer ' + ghToken, Accept: 'application/vnd.github+json' }
+        }).then(r => {
+          if (!r.ok) throw new Error('HTTP ' + r.status);
+          return r.json();
+        });
+        const rows = [];
+        for (const issue of issues) {
+          const title = issue.title || '';
+          if (!title.includes('[axon-bind]')) continue;
+          let payload = null;
+          let err = '';
+          try {
+            const blob = extractBindJson(issue.body || '');
+            payload = await decryptBindBlob(blob);
+          } catch (e) {
+            err = String(e.message || e);
+          }
+          rows.push({ issue, payload, err });
+        }
+        if (!rows.length) {
+          box.textContent = 'Нет заявок';
+          return;
+        }
+        box.className = '';
+        box.innerHTML = `<table><thead><tr><th>ЮЗЕР</th><th>HWID / ПАРОЛЬ</th><th></th></tr></thead><tbody>` +
+          rows.map(({ issue, payload, err }) => {
+            if (!payload) {
+              return `<tr><td colspan="2">#${issue.number} decrypt fail: ${escapeHtml(err)}</td>
+                <td><button class="btn danger" data-close="${issue.number}">Отклонить</button></td></tr>`;
+            }
+            return `<tr>
+              <td>${escapeHtml(payload.user || '')}<div class="hw">#${issue.number} · app ${escapeHtml(String(payload.app || ''))}</div></td>
+              <td>
+                <div class="hw">${escapeHtml(payload.hwid || '')}</div>
+                <div class="pass">${escapeHtml(payload.password || '')}</div>
+              </td>
+              <td>
+                <button class="btn" data-approve="${issue.number}">Одобрить + publish</button>
+                <button class="btn ghost" data-fill="${issue.number}" style="margin-top:6px">Только в форму</button>
+                <button class="btn danger" data-close="${issue.number}" style="margin-top:6px">Отклонить</button>
+              </td>
+            </tr>`;
+          }).join('') + `</tbody></table>`;
+
+        const byNum = Object.fromEntries(rows.map(r => [String(r.issue.number), r]));
+
+        box.querySelectorAll('[data-approve]').forEach(btn => {
+          btn.onclick = async () => {
+            const row = byNum[btn.dataset.approve];
+            if (!row?.payload) return;
+            const u = row.payload.user;
+            const h = row.payload.hwid;
+            let acc = db.accounts.find(a => a.user.toLowerCase() === String(u).toLowerCase());
+            if (!acc) {
+              showStatus('Сначала создай аккаунт, потом Approve', false);
+              return;
+            }
+            acc.hwids = acc.hwids || [];
+            if (h && !acc.hwids.includes(h)) acc.hwids.push(h);
+            render();
+            try {
+              await publishAccounts();
+              await closeIssue(row.issue.number);
+              showStatus(`Одобрен ${u} · опубликовано`);
+              await loadPending();
+            } catch (e) {
+              showStatus('Approve fail: ' + e.message, false);
+            }
+          };
+        });
+        box.querySelectorAll('[data-fill]').forEach(btn => {
+          btn.onclick = () => {
+            const row = byNum[btn.dataset.fill];
+            if (!row?.payload) return;
+            $('user').value = row.payload.user || '';
+            $('pass').value = row.payload.password || '';
+            $('hwid').value = row.payload.hwid || '';
+            showStatus('Форма заполнена из заявки');
+          };
+        });
+        box.querySelectorAll('[data-close]').forEach(btn => {
+          btn.onclick = async () => {
+            try {
+              await closeIssue(+btn.dataset.close);
+              showStatus('Отклонено #' + btn.dataset.close);
+              await loadPending();
+            } catch (e) {
+              showStatus(String(e.message || e), false);
+            }
+          };
+        });
+      } catch (e) {
+        box.textContent = 'Ошибка inbox: ' + (e.message || e);
+      }
+    }
+
+    async function closeIssue(num) {
+      const res = await fetch(`https://api.github.com/repos/${GH_REPO}/issues/${num}`, {
+        method: 'PATCH',
+        headers: {
+          Authorization: 'Bearer ' + ghToken,
+          Accept: 'application/vnd.github+json',
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ state: 'closed' }),
+      });
+      if (!res.ok) throw new Error(await res.text());
+    }
+
+    async function loadLatest() {
+      try {
+        const j = await fetch(
+          'https://raw.githubusercontent.com/awkcrud/axon-site/catalog/latest.json?t=' + Date.now(),
+          { cache: 'no-store' }
+        ).then(r => r.json());
+        $('relVer').value = j.version || '';
+        $('relNotes').value = j.notes || '';
+        $('relUrl').value = j.downloadUrl || '';
+        $('relStatus').className = 'ok';
+        $('relStatus').textContent = 'Загружено · ' + (j.releasedAt || '');
+      } catch (e) {
+        $('relStatus').className = 'err';
+        $('relStatus').textContent = String(e.message || e);
+      }
+    }
+
+    async function publishLatest() {
+      try {
+        const obj = {
+          version: $('relVer').value.trim(),
+          notes: $('relNotes').value.trim(),
+          downloadUrl: $('relUrl').value.trim(),
+          releasedAt: new Date().toISOString(),
+        };
+        if (!obj.version) throw new Error('Нужна version');
+        let sha;
+        try { sha = (await ghGet('latest.json', 'catalog')).sha; } catch {}
+        await ghPut(
+          'latest.json',
+          btoa(unescape(encodeURIComponent(JSON.stringify(obj, null, 2)))),
+          `chore(release): ${obj.version}`,
+          'catalog',
+          sha
+        );
+        // mirror main
+        try {
+          let shaMain;
+          try {
+            const cur = await fetch(`https://api.github.com/repos/${GH_REPO}/contents/latest.json?ref=main`, {
+              headers: { Authorization: 'Bearer ' + ghToken, Accept: 'application/vnd.github+json' }
+            }).then(r => r.ok ? r.json() : null);
+            shaMain = cur?.sha;
+          } catch {}
+          await ghPut(
+            'latest.json',
+            btoa(unescape(encodeURIComponent(JSON.stringify(obj, null, 2)))),
+            `chore(release): ${obj.version} mirror`,
+            'main',
+            shaMain
+          );
+        } catch { /* optional */ }
+        $('relStatus').className = 'ok';
+        $('relStatus').textContent = 'latest.json опубликован';
+        showStatus('Релиз-манифест обновлён');
+      } catch (e) {
+        $('relStatus').className = 'err';
+        $('relStatus').textContent = String(e.message || e);
+        showStatus('Релиз fail: ' + e.message, false);
+      }
+    }
+
+    $('unlockBtn').onclick = async () => {
+      $('gateErr').classList.add('hidden');
+      try {
+        const secrets = await unlockAdminPack(($('adminKey').value || '').trim());
+        vaultSecret = secrets.vaultSecret || '';
+        ghToken = secrets.ghToken || '';
+        if (!vaultSecret || !ghToken) throw new Error('Pack incomplete');
+      } catch {
+        $('gateErr').textContent = 'Неверный ключ или повреждённый pack';
+        $('gateErr').classList.remove('hidden');
+        return;
+      }
+      try {
+        const cur = await fetch('./accounts.json', { cache: 'no-store' }).then(r => r.json());
+        db = await decryptVault(cur, vaultSecret);
+        if (!Array.isArray(db.accounts)) db = { accounts: [] };
+      } catch {
+        db = { accounts: [] };
+      }
+      $('gate').classList.add('hidden');
+      $('app').classList.remove('hidden');
+      render();
+      await loadPending();
+      await loadReports();
+      await loadCatalogMeta();
+      await loadLive();
+      if (liveTimer) clearInterval(liveTimer);
+      liveTimer = setInterval(() => { loadLive(); loadReports(); }, 30000);
+    };
+
+    $('addBtn').onclick = async () => {
+      const user = $('user').value.trim();
+      const pass = $('pass').value;
+      const hwid = $('hwid').value.trim();
+      if (!user || !pass) { showStatus('Нужны логин и пароль', false); return; }
+      const saltBytes = crypto.getRandomValues(new Uint8Array(16));
+      const salt = b64(saltBytes);
+      const passHash = await pbkdf2Hash(pass, saltBytes);
+      const prev = db.accounts.find(a => a.user.toLowerCase() === user.toLowerCase());
+      const hwids = [...(prev?.hwids || [])];
+      if (hwid && !hwids.includes(hwid)) hwids.push(hwid);
+      const entry = { user, passHash, salt, hwids, recovery: prev?.recovery || {} };
+      db.accounts = db.accounts.filter(a => a.user.toLowerCase() !== user.toLowerCase());
+      db.accounts.push(entry);
+      $('user').value = '';
+      $('pass').value = '';
+      $('hwid').value = '';
+      render();
+      showStatus(`Сохранено: ${user}`);
+    };
+
+    $('exportBtn').onclick = async () => {
+      const vault = await encryptVault(db, vaultSecret);
+      const blob = new Blob([JSON.stringify(vault, null, 2)], { type: 'application/json' });
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      a.download = 'accounts.json';
+      a.click();
+      URL.revokeObjectURL(a.href);
+      showStatus('Скачано');
+    };
+
+    $('copyBtn').onclick = async () => {
+      await navigator.clipboard.writeText($('preview').value);
+      showStatus('Скопировано');
+    };
+
+    $('importBtn').onclick = () => $('fileIn').click();
+    $('fileIn').onchange = async (e) => {
+      const f = e.target.files?.[0];
+      if (!f) return;
+      try {
+        const obj = JSON.parse(await f.text());
+        db = await decryptVault(obj, vaultSecret);
+        if (!Array.isArray(db.accounts)) throw new Error('no accounts');
+        render();
+        showStatus(`Импорт: ${db.accounts.length}`);
+      } catch (err) {
+        showStatus('Импорт fail: ' + err.message, false);
+      }
+    };
+
+    $('publishBtn').onclick = async () => {
+      try {
+        await publishAccounts();
+        showStatus('accounts.json опубликован на GitHub');
+      } catch (err) {
+        showStatus('Publish fail: ' + err.message, false);
+      }
+    };
+
+    $('refreshPendingBtn').onclick = () => loadPending();
+    $('refreshReportsBtn').onclick = () => loadReports();
+    $('refreshLiveBtn').onclick = () => loadLive();
+    $('purgeLiveBtn').onclick = () => purgeOfflineLive();
+    $('showAllDevices').onchange = () => loadLive();
+    $('fetchRepoBtn').onclick = () => fetchRepoStrategies();
+    $('trustRepo').onchange = () => {
+      const isBolVan = $('trustRepo').value === 'bol-van/zapret';
+      $('fetchRepoBtn').textContent = isBolVan ? 'Скачать списки (hostlist/ipset)' : 'Скачать стратегии (.bat)';
+    };
+    $('loadCurrentCatalogBtn').onclick = () => loadCurrentCatalog();
+    $('loadCurrentPackBtn').onclick = () => loadCurrentPack();
+    $('publishPackBtn').onclick = () => publishPack();
+    $('previewArgsBtn').onclick = () => previewFirstArgs();
+    $('refreshHealthBtn').onclick = () => { updateHealthChart(); updateRetireHints(); };
+    $('retireThreshold').onchange = () => updateRetireHints();
+    $('loadLatestBtn').onclick = () => loadLatest();
+    $('publishLatestBtn').onclick = () => publishLatest();
+  </script>
+</body>
+</html>
