@@ -2,11 +2,11 @@
   "packs": [
     {
       "id": "axon-stable",
-      "version": "6",
+      "version": "7",
       "channel": "stable",
-      "url": "packs/axon-stable-v6.axonpack",
-      "sha256": "2132a7a633e101554639f924f379867e179354a506d2bd88f677b4e1c3450d9f",
-      "signature": "3da193a5c6ab35710fb47af339caed7967905c24964d0e61692ac834f88d0cd7",
+      "url": "packs/axon-stable-v7.axonpack",
+      "sha256": "e0e3b3794704ae744a2cb9fd4d2bd70c9d1aed19900e8b1e740f14c020506870",
+      "signature": "ba995b2539082b344db5a0d8c15c664bd724cc275f51d41937ec95a2f72fe73a",
       "signatureRequired": true,
       "minAppVersion": "1.4.0",
       "changelog": "Expanded with variants of working DPI families (fake+fakedsplit / hostfakesplit / fake+tls / fake+multisplit)."
