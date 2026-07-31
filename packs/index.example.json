@@ -1,0 +1,24 @@
+﻿{
+  "packs": [
+    {
+      "id": "axon-stable",
+      "version": "1",
+      "channel": "stable",
+      "url": "packs/axon-stable-v1.axonpack",
+      "sha256": "REPLACE_AFTER_PUBLISH",
+      "signature": "REPLACE_HMAC_SHA256",
+      "signatureRequired": false,
+      "minAppVersion": "1.4.0",
+      "changelog": "Initial AXON pack (strategies + runtime + probe)"
+    }
+  ],
+  "engineLayers": [
+    {
+      "id": "bins",
+      "version": "1",
+      "url": "packs/engine-bins-v1.zip",
+      "sha256": "OPTIONAL",
+      "note": "Only allowlisted *.bin fake payloads, never WinDivert.sys"
+    }
+  ]
+}
