@@ -1,5 +1,5 @@
 {
-  "version": 6,
+  "version": 7,
   "updated": "2026-07-31",
   "note": "Expanded with variants of working DPI families (fake+fakedsplit / hostfakesplit / fake+tls / fake+multisplit).",
   "strategies": [
@@ -562,6 +562,703 @@
       "ytProfile": "disorder",
       "enabled": true,
       "priority": 100
+    },
+    {
+      "id": "general_alt",
+      "title": "Comprehensive (Alt)",
+      "titleRu": "Комплексный (Alt)",
+      "titleEn": "Comprehensive (Alt)",
+      "blurbRu": "Fake + Fakedsplit · 4pda",
+      "blurbEn": "Imported from Flowseal/zapret-discord-youtube",
+      "youtube": true,
+      "discord": true,
+      "quic": true,
+      "ytProfile": "alt",
+      "dpiCore": [
+        "--dpi-desync=fake",
+        "--dpi-desync-repeats=6",
+        "--dpi-desync-fake-quic=\"%BIN%quic_initial_www_google_com.bin\""
+      ],
+      "dpiGeneral": [
+        "--dpi-desync=fake",
+        "--dpi-desync-fake-discord=\"%BIN%ACTIVE_DISCORD_UDP.bin\"",
+        "--dpi-desync-fake-stun=\"%BIN%ACTIVE_DISCORD_UDP.bin\"",
+        "--dpi-desync-repeats=6"
+      ],
+      "tags": [
+        "import",
+        "flowseal"
+      ],
+      "enabled": true,
+      "priority": 80,
+      "source": {
+        "repo": "Flowseal/zapret-discord-youtube",
+        "file": "general (ALT).bat"
+      }
+    },
+    {
+      "id": "general_alt10",
+      "title": "Comprehensive (Alt 10)",
+      "titleRu": "Комплексный (Alt 10)",
+      "titleEn": "Comprehensive (Alt 10)",
+      "blurbRu": "Усиленный TLS fake",
+      "blurbEn": "Imported from Flowseal/zapret-discord-youtube",
+      "youtube": true,
+      "discord": true,
+      "quic": true,
+      "ytProfile": "alt",
+      "dpiCore": [
+        "--dpi-desync=fake",
+        "--dpi-desync-repeats=6",
+        "--dpi-desync-fake-quic=\"%BIN%quic_initial_www_google_com.bin\""
+      ],
+      "dpiGeneral": [
+        "--dpi-desync=fake",
+        "--dpi-desync-fake-discord=\"%BIN%ACTIVE_DISCORD_UDP.bin\"",
+        "--dpi-desync-fake-stun=\"%BIN%ACTIVE_DISCORD_UDP.bin\"",
+        "--dpi-desync-repeats=6"
+      ],
+      "tags": [
+        "import",
+        "flowseal"
+      ],
+      "enabled": true,
+      "priority": 80,
+      "source": {
+        "repo": "Flowseal/zapret-discord-youtube",
+        "file": "general (ALT10).bat"
+      }
+    },
+    {
+      "id": "general_alt11",
+      "title": "Comprehensive (Alt 11)",
+      "titleRu": "Комплексный (Alt 11)",
+      "titleEn": "Comprehensive (Alt 11)",
+      "blurbRu": "Совместимый DPI профиль",
+      "blurbEn": "Imported from Flowseal/zapret-discord-youtube",
+      "youtube": true,
+      "discord": true,
+      "quic": true,
+      "ytProfile": "alt",
+      "dpiCore": [
+        "--dpi-desync=fake",
+        "--dpi-desync-repeats=11",
+        "--dpi-desync-fake-quic=\"%BIN%quic_initial_www_google_com.bin\""
+      ],
+      "dpiGeneral": [
+        "--dpi-desync=fake",
+        "--dpi-desync-fake-discord=\"%BIN%ACTIVE_DISCORD_UDP.bin\"",
+        "--dpi-desync-fake-stun=\"%BIN%ACTIVE_DISCORD_UDP.bin\"",
+        "--dpi-desync-repeats=6"
+      ],
+      "tags": [
+        "import",
+        "flowseal"
+      ],
+      "enabled": true,
+      "priority": 80,
+      "source": {
+        "repo": "Flowseal/zapret-discord-youtube",
+        "file": "general (ALT11).bat"
+      }
+    },
+    {
+      "id": "general_alt12",
+      "title": "Comprehensive (Alt 12)",
+      "titleRu": "Комплексный (Alt 12)",
+      "titleEn": "Comprehensive (Alt 12)",
+      "blurbRu": "Максимальный DPI профиль",
+      "blurbEn": "Imported from Flowseal/zapret-discord-youtube",
+      "youtube": true,
+      "discord": true,
+      "quic": true,
+      "ytProfile": "alt",
+      "dpiCore": [
+        "--dpi-desync=fake",
+        "--dpi-desync-repeats=11",
+        "--dpi-desync-fake-quic=\"%BIN%quic_initial_www_google_com.bin\""
+      ],
+      "dpiGeneral": [
+        "--dpi-desync=fake",
+        "--dpi-desync-fake-discord=\"%BIN%stun.bin\"",
+        "--dpi-desync-fake-discord=\"%BIN%ACTIVE_DISCORD_UDP.bin\"",
+        "--dpi-desync-fake-stun=\"%BIN%ACTIVE_DISCORD_UDP.bin\"",
+        "--dpi-desync-repeats=3"
+      ],
+      "tags": [
+        "import",
+        "flowseal"
+      ],
+      "enabled": true,
+      "priority": 80,
+      "source": {
+        "repo": "Flowseal/zapret-discord-youtube",
+        "file": "general (ALT12).bat"
+      }
+    },
+    {
+      "id": "general_alt2",
+      "title": "Comprehensive (Alt 2)",
+      "titleRu": "Комплексный (Alt 2)",
+      "titleEn": "Comprehensive (Alt 2)",
+      "blurbRu": "Fake TLS + split для YouTube и Discord",
+      "blurbEn": "Imported from Flowseal/zapret-discord-youtube",
+      "youtube": true,
+      "discord": true,
+      "quic": true,
+      "ytProfile": "alt",
+      "dpiCore": [
+        "--dpi-desync=fake",
+        "--dpi-desync-repeats=6",
+        "--dpi-desync-fake-quic=\"%BIN%quic_initial_www_google_com.bin\""
+      ],
+      "dpiGeneral": [
+        "--dpi-desync=fake",
+        "--dpi-desync-fake-discord=\"%BIN%ACTIVE_DISCORD_UDP.bin\"",
+        "--dpi-desync-fake-stun=\"%BIN%ACTIVE_DISCORD_UDP.bin\"",
+        "--dpi-desync-repeats=6"
+      ],
+      "tags": [
+        "import",
+        "flowseal"
+      ],
+      "enabled": true,
+      "priority": 80,
+      "source": {
+        "repo": "Flowseal/zapret-discord-youtube",
+        "file": "general (ALT2).bat"
+      }
+    },
+    {
+      "id": "general_alt3",
+      "title": "Comprehensive (Alt 3)",
+      "titleRu": "Комплексный (Alt 3)",
+      "titleEn": "Comprehensive (Alt 3)",
+      "blurbRu": "Усиленный fake профиль",
+      "blurbEn": "Imported from Flowseal/zapret-discord-youtube",
+      "youtube": true,
+      "discord": true,
+      "quic": true,
+      "ytProfile": "alt",
+      "dpiCore": [
+        "--dpi-desync=fake",
+        "--dpi-desync-repeats=6",
+        "--dpi-desync-fake-quic=\"%BIN%quic_initial_www_google_com.bin\""
+      ],
+      "dpiGeneral": [
+        "--dpi-desync=fake",
+        "--dpi-desync-fake-discord=\"%BIN%ACTIVE_DISCORD_UDP.bin\"",
+        "--dpi-desync-fake-stun=\"%BIN%ACTIVE_DISCORD_UDP.bin\"",
+        "--dpi-desync-repeats=6"
+      ],
+      "tags": [
+        "import",
+        "flowseal"
+      ],
+      "enabled": true,
+      "priority": 80,
+      "source": {
+        "repo": "Flowseal/zapret-discord-youtube",
+        "file": "general (ALT3).bat"
+      }
+    },
+    {
+      "id": "general_alt4",
+      "title": "Comprehensive (Alt 4)",
+      "titleRu": "Комплексный (Alt 4)",
+      "titleEn": "Comprehensive (Alt 4)",
+      "blurbRu": "Fakedsplit · 4pda",
+      "blurbEn": "Imported from Flowseal/zapret-discord-youtube",
+      "youtube": true,
+      "discord": true,
+      "quic": true,
+      "ytProfile": "alt",
+      "dpiCore": [
+        "--dpi-desync=fake",
+        "--dpi-desync-repeats=6",
+        "--dpi-desync-fake-quic=\"%BIN%quic_initial_www_google_com.bin\""
+      ],
+      "dpiGeneral": [
+        "--dpi-desync=fake",
+        "--dpi-desync-fake-discord=\"%BIN%ACTIVE_DISCORD_UDP.bin\"",
+        "--dpi-desync-fake-stun=\"%BIN%ACTIVE_DISCORD_UDP.bin\"",
+        "--dpi-desync-repeats=6"
+      ],
+      "tags": [
+        "import",
+        "flowseal"
+      ],
+      "enabled": true,
+      "priority": 80,
+      "source": {
+        "repo": "Flowseal/zapret-discord-youtube",
+        "file": "general (ALT4).bat"
+      }
+    },
+    {
+      "id": "general_alt5",
+      "title": "Comprehensive (Alt 5)",
+      "titleRu": "Комплексный (Alt 5)",
+      "titleEn": "Comprehensive (Alt 5)",
+      "blurbRu": "Fake TLS для сложных сетей",
+      "blurbEn": "Imported from Flowseal/zapret-discord-youtube",
+      "youtube": true,
+      "discord": true,
+      "quic": true,
+      "ytProfile": "alt",
+      "dpiCore": [
+        "--dpi-desync=fake",
+        "--dpi-desync-repeats=6",
+        "--dpi-desync-fake-quic=\"%BIN%quic_initial_www_google_com.bin\""
+      ],
+      "dpiGeneral": [
+        "--dpi-desync=fake",
+        "--dpi-desync-fake-discord=\"%BIN%ACTIVE_DISCORD_UDP.bin\"",
+        "--dpi-desync-fake-stun=\"%BIN%ACTIVE_DISCORD_UDP.bin\"",
+        "--dpi-desync-repeats=6"
+      ],
+      "tags": [
+        "import",
+        "flowseal"
+      ],
+      "enabled": true,
+      "priority": 80,
+      "source": {
+        "repo": "Flowseal/zapret-discord-youtube",
+        "file": "general (ALT5).bat"
+      }
+    },
+    {
+      "id": "general_alt6",
+      "title": "Comprehensive (Alt 6)",
+      "titleRu": "Комплексный (Alt 6)",
+      "titleEn": "Comprehensive (Alt 6)",
+      "blurbRu": "Разделение TLS и HTTP",
+      "blurbEn": "Imported from Flowseal/zapret-discord-youtube",
+      "youtube": true,
+      "discord": true,
+      "quic": true,
+      "ytProfile": "alt",
+      "dpiCore": [
+        "--dpi-desync=fake",
+        "--dpi-desync-repeats=6",
+        "--dpi-desync-fake-quic=\"%BIN%quic_initial_www_google_com.bin\""
+      ],
+      "dpiGeneral": [
+        "--dpi-desync=fake",
+        "--dpi-desync-fake-discord=\"%BIN%ACTIVE_DISCORD_UDP.bin\"",
+        "--dpi-desync-fake-stun=\"%BIN%ACTIVE_DISCORD_UDP.bin\"",
+        "--dpi-desync-repeats=6"
+      ],
+      "tags": [
+        "import",
+        "flowseal"
+      ],
+      "enabled": true,
+      "priority": 80,
+      "source": {
+        "repo": "Flowseal/zapret-discord-youtube",
+        "file": "general (ALT6).bat"
+      }
+    },
+    {
+      "id": "general_alt7",
+      "title": "Comprehensive (Alt 7)",
+      "titleRu": "Комплексный (Alt 7)",
+      "titleEn": "Comprehensive (Alt 7)",
+      "blurbRu": "Расширенный DPI обход",
+      "blurbEn": "Imported from Flowseal/zapret-discord-youtube",
+      "youtube": true,
+      "discord": true,
+      "quic": true,
+      "ytProfile": "alt",
+      "dpiCore": [
+        "--dpi-desync=fake",
+        "--dpi-desync-repeats=6",
+        "--dpi-desync-fake-quic=\"%BIN%quic_initial_www_google_com.bin\""
+      ],
+      "dpiGeneral": [
+        "--dpi-desync=fake",
+        "--dpi-desync-fake-discord=\"%BIN%ACTIVE_DISCORD_UDP.bin\"",
+        "--dpi-desync-fake-stun=\"%BIN%ACTIVE_DISCORD_UDP.bin\"",
+        "--dpi-desync-repeats=6"
+      ],
+      "tags": [
+        "import",
+        "flowseal"
+      ],
+      "enabled": true,
+      "priority": 80,
+      "source": {
+        "repo": "Flowseal/zapret-discord-youtube",
+        "file": "general (ALT7).bat"
+      }
+    },
+    {
+      "id": "general_alt8",
+      "title": "Comprehensive (Alt 8)",
+      "titleRu": "Комплексный (Alt 8)",
+      "titleEn": "Comprehensive (Alt 8)",
+      "blurbRu": "Профиль с повторениями",
+      "blurbEn": "Imported from Flowseal/zapret-discord-youtube",
+      "youtube": true,
+      "discord": true,
+      "quic": true,
+      "ytProfile": "alt",
+      "dpiCore": [
+        "--dpi-desync=fake",
+        "--dpi-desync-repeats=6",
+        "--dpi-desync-fake-quic=\"%BIN%quic_initial_www_google_com.bin\""
+      ],
+      "dpiGeneral": [
+        "--dpi-desync=fake",
+        "--dpi-desync-fake-discord=\"%BIN%ACTIVE_DISCORD_UDP.bin\"",
+        "--dpi-desync-fake-stun=\"%BIN%ACTIVE_DISCORD_UDP.bin\"",
+        "--dpi-desync-repeats=6"
+      ],
+      "tags": [
+        "import",
+        "flowseal"
+      ],
+      "enabled": true,
+      "priority": 80,
+      "source": {
+        "repo": "Flowseal/zapret-discord-youtube",
+        "file": "general (ALT8).bat"
+      }
+    },
+    {
+      "id": "general_alt9",
+      "title": "Comprehensive (Alt 9)",
+      "titleRu": "Комплексный (Alt 9)",
+      "titleEn": "Comprehensive (Alt 9)",
+      "blurbRu": "Профиль для нестабильных сетей",
+      "blurbEn": "Imported from Flowseal/zapret-discord-youtube",
+      "youtube": true,
+      "discord": true,
+      "quic": true,
+      "ytProfile": "alt",
+      "dpiCore": [
+        "--dpi-desync=fake",
+        "--dpi-desync-repeats=6",
+        "--dpi-desync-fake-quic=\"%BIN%quic_initial_www_google_com.bin\""
+      ],
+      "dpiGeneral": [
+        "--dpi-desync=fake",
+        "--dpi-desync-fake-discord=\"%BIN%ACTIVE_DISCORD_UDP.bin\"",
+        "--dpi-desync-fake-stun=\"%BIN%ACTIVE_DISCORD_UDP.bin\"",
+        "--dpi-desync-repeats=6"
+      ],
+      "tags": [
+        "import",
+        "flowseal"
+      ],
+      "enabled": true,
+      "priority": 80,
+      "source": {
+        "repo": "Flowseal/zapret-discord-youtube",
+        "file": "general (ALT9).bat"
+      }
+    },
+    {
+      "id": "general_exp",
+      "title": "Experimental",
+      "titleRu": "Экспериментальный",
+      "titleEn": "Experimental",
+      "blurbRu": "Экспериментальный AXON профиль",
+      "blurbEn": "Imported from Flowseal/zapret-discord-youtube",
+      "youtube": true,
+      "discord": true,
+      "quic": true,
+      "ytProfile": "alt",
+      "dpiCore": [
+        "--dpi-desync=fake",
+        "--dpi-desync-repeats=11",
+        "--dpi-desync-fake-quic=\"%BIN%quic_initial_www_google_com.bin\""
+      ],
+      "dpiGeneral": [
+        "--dpi-desync=fake",
+        "--dpi-desync-fake-discord=\"%BIN%quic_initial_www_google_com.bin\"",
+        "--dpi-desync-fake-discord=\"%BIN%ACTIVE_DISCORD_UDP.bin\"",
+        "--dpi-desync-fake-stun=\"%BIN%ACTIVE_DISCORD_UDP.bin\"",
+        "--dpi-desync-fake-unknown-udp=\"%BIN%quic_initial_www_google_com.bin\"",
+        "--dpi-desync-fake-unknown-udp=\"%BIN%ACTIVE_DISCORD_UDP.bin\"",
+        "--dpi-desync-repeats=4"
+      ],
+      "tags": [
+        "import",
+        "flowseal"
+      ],
+      "enabled": true,
+      "priority": 80,
+      "source": {
+        "repo": "Flowseal/zapret-discord-youtube",
+        "file": "general (EXP).bat"
+      }
+    },
+    {
+      "id": "general_fake_tls_auto_alt",
+      "title": "Fake TLS Auto",
+      "titleRu": "Fake TLS Auto",
+      "titleEn": "Fake TLS Auto",
+      "blurbRu": "Автоматический Fake TLS профиль",
+      "blurbEn": "Imported from Flowseal/zapret-discord-youtube",
+      "youtube": true,
+      "discord": true,
+      "quic": true,
+      "ytProfile": "alt",
+      "dpiCore": [
+        "--dpi-desync=fake",
+        "--dpi-desync-repeats=11",
+        "--dpi-desync-fake-quic=\"%BIN%quic_initial_www_google_com.bin\""
+      ],
+      "dpiGeneral": [
+        "--dpi-desync=fake",
+        "--dpi-desync-fake-discord=\"%BIN%ACTIVE_DISCORD_UDP.bin\"",
+        "--dpi-desync-fake-stun=\"%BIN%ACTIVE_DISCORD_UDP.bin\"",
+        "--dpi-desync-repeats=6"
+      ],
+      "tags": [
+        "import",
+        "flowseal"
+      ],
+      "enabled": true,
+      "priority": 80,
+      "source": {
+        "repo": "Flowseal/zapret-discord-youtube",
+        "file": "general (FAKE TLS AUTO ALT).bat"
+      }
+    },
+    {
+      "id": "general_fake_tls_auto_alt2",
+      "title": "Comprehensive (Alt 2)",
+      "titleRu": "Комплексный (Alt 2)",
+      "titleEn": "Comprehensive (Alt 2)",
+      "blurbRu": "Fake TLS + split для YouTube и Discord",
+      "blurbEn": "Imported from Flowseal/zapret-discord-youtube",
+      "youtube": true,
+      "discord": true,
+      "quic": true,
+      "ytProfile": "alt",
+      "dpiCore": [
+        "--dpi-desync=fake",
+        "--dpi-desync-repeats=11",
+        "--dpi-desync-fake-quic=\"%BIN%quic_initial_www_google_com.bin\""
+      ],
+      "dpiGeneral": [
+        "--dpi-desync=fake",
+        "--dpi-desync-fake-discord=\"%BIN%ACTIVE_DISCORD_UDP.bin\"",
+        "--dpi-desync-fake-stun=\"%BIN%ACTIVE_DISCORD_UDP.bin\"",
+        "--dpi-desync-repeats=6"
+      ],
+      "tags": [
+        "import",
+        "flowseal"
+      ],
+      "enabled": true,
+      "priority": 80,
+      "source": {
+        "repo": "Flowseal/zapret-discord-youtube",
+        "file": "general (FAKE TLS AUTO ALT2).bat"
+      }
+    },
+    {
+      "id": "general_fake_tls_auto_alt3",
+      "title": "Comprehensive (Alt 3)",
+      "titleRu": "Комплексный (Alt 3)",
+      "titleEn": "Comprehensive (Alt 3)",
+      "blurbRu": "Усиленный fake профиль",
+      "blurbEn": "Imported from Flowseal/zapret-discord-youtube",
+      "youtube": true,
+      "discord": true,
+      "quic": true,
+      "ytProfile": "alt",
+      "dpiCore": [
+        "--dpi-desync=fake",
+        "--dpi-desync-repeats=11",
+        "--dpi-desync-fake-quic=\"%BIN%quic_initial_www_google_com.bin\""
+      ],
+      "dpiGeneral": [
+        "--dpi-desync=fake",
+        "--dpi-desync-fake-discord=\"%BIN%ACTIVE_DISCORD_UDP.bin\"",
+        "--dpi-desync-fake-stun=\"%BIN%ACTIVE_DISCORD_UDP.bin\"",
+        "--dpi-desync-repeats=6"
+      ],
+      "tags": [
+        "import",
+        "flowseal"
+      ],
+      "enabled": true,
+      "priority": 80,
+      "source": {
+        "repo": "Flowseal/zapret-discord-youtube",
+        "file": "general (FAKE TLS AUTO ALT3).bat"
+      }
+    },
+    {
+      "id": "general_fake_tls_auto",
+      "title": "Fake TLS Auto",
+      "titleRu": "Fake TLS Auto",
+      "titleEn": "Fake TLS Auto",
+      "blurbRu": "Автоматический Fake TLS профиль",
+      "blurbEn": "Imported from Flowseal/zapret-discord-youtube",
+      "youtube": true,
+      "discord": true,
+      "quic": true,
+      "ytProfile": "alt",
+      "dpiCore": [
+        "--dpi-desync=fake",
+        "--dpi-desync-repeats=11",
+        "--dpi-desync-fake-quic=\"%BIN%quic_initial_www_google_com.bin\""
+      ],
+      "dpiGeneral": [
+        "--dpi-desync=fake",
+        "--dpi-desync-fake-discord=\"%BIN%ACTIVE_DISCORD_UDP.bin\"",
+        "--dpi-desync-fake-stun=\"%BIN%ACTIVE_DISCORD_UDP.bin\"",
+        "--dpi-desync-repeats=6"
+      ],
+      "tags": [
+        "import",
+        "flowseal"
+      ],
+      "enabled": true,
+      "priority": 80,
+      "source": {
+        "repo": "Flowseal/zapret-discord-youtube",
+        "file": "general (FAKE TLS AUTO).bat"
+      }
+    },
+    {
+      "id": "general_simple_fake_alt",
+      "title": "Simple Fake",
+      "titleRu": "Простой Fake",
+      "titleEn": "Simple Fake",
+      "blurbRu": "Легкий Fake профиль",
+      "blurbEn": "Imported from Flowseal/zapret-discord-youtube",
+      "youtube": true,
+      "discord": true,
+      "quic": true,
+      "ytProfile": "alt",
+      "dpiCore": [
+        "--dpi-desync=fake",
+        "--dpi-desync-repeats=6",
+        "--dpi-desync-fake-quic=\"%BIN%quic_initial_www_google_com.bin\""
+      ],
+      "dpiGeneral": [
+        "--dpi-desync=fake",
+        "--dpi-desync-fake-discord=\"%BIN%ACTIVE_DISCORD_UDP.bin\"",
+        "--dpi-desync-fake-stun=\"%BIN%ACTIVE_DISCORD_UDP.bin\"",
+        "--dpi-desync-repeats=6"
+      ],
+      "tags": [
+        "import",
+        "flowseal"
+      ],
+      "enabled": true,
+      "priority": 80,
+      "source": {
+        "repo": "Flowseal/zapret-discord-youtube",
+        "file": "general (SIMPLE FAKE ALT).bat"
+      }
+    },
+    {
+      "id": "general_simple_fake_alt2",
+      "title": "Comprehensive (Alt 2)",
+      "titleRu": "Комплексный (Alt 2)",
+      "titleEn": "Comprehensive (Alt 2)",
+      "blurbRu": "Fake TLS + split для YouTube и Discord",
+      "blurbEn": "Imported from Flowseal/zapret-discord-youtube",
+      "youtube": true,
+      "discord": true,
+      "quic": true,
+      "ytProfile": "alt",
+      "dpiCore": [
+        "--dpi-desync=fake",
+        "--dpi-desync-repeats=6",
+        "--dpi-desync-fake-quic=\"%BIN%quic_initial_www_google_com.bin\""
+      ],
+      "dpiGeneral": [
+        "--dpi-desync=fake",
+        "--dpi-desync-fake-discord=\"%BIN%ACTIVE_DISCORD_UDP.bin\"",
+        "--dpi-desync-fake-stun=\"%BIN%ACTIVE_DISCORD_UDP.bin\"",
+        "--dpi-desync-repeats=6"
+      ],
+      "tags": [
+        "import",
+        "flowseal"
+      ],
+      "enabled": true,
+      "priority": 80,
+      "source": {
+        "repo": "Flowseal/zapret-discord-youtube",
+        "file": "general (SIMPLE FAKE ALT2).bat"
+      }
+    },
+    {
+      "id": "general_simple_fake",
+      "title": "Simple Fake",
+      "titleRu": "Простой Fake",
+      "titleEn": "Simple Fake",
+      "blurbRu": "Легкий Fake профиль",
+      "blurbEn": "Imported from Flowseal/zapret-discord-youtube",
+      "youtube": true,
+      "discord": true,
+      "quic": true,
+      "ytProfile": "alt",
+      "dpiCore": [
+        "--dpi-desync=fake",
+        "--dpi-desync-repeats=6",
+        "--dpi-desync-fake-quic=\"%BIN%quic_initial_www_google_com.bin\""
+      ],
+      "dpiGeneral": [
+        "--dpi-desync=fake",
+        "--dpi-desync-fake-discord=\"%BIN%ACTIVE_DISCORD_UDP.bin\"",
+        "--dpi-desync-fake-stun=\"%BIN%ACTIVE_DISCORD_UDP.bin\"",
+        "--dpi-desync-repeats=6"
+      ],
+      "tags": [
+        "import",
+        "flowseal"
+      ],
+      "enabled": true,
+      "priority": 80,
+      "source": {
+        "repo": "Flowseal/zapret-discord-youtube",
+        "file": "general (SIMPLE FAKE).bat"
+      }
+    },
+    {
+      "id": "general",
+      "title": "Comprehensive",
+      "titleRu": "Комплексный",
+      "titleEn": "Comprehensive",
+      "blurbRu": "Универсальный профиль AXON",
+      "blurbEn": "Imported from Flowseal/zapret-discord-youtube",
+      "youtube": true,
+      "discord": true,
+      "quic": true,
+      "ytProfile": "alt",
+      "dpiCore": [
+        "--dpi-desync=fake",
+        "--dpi-desync-repeats=6",
+        "--dpi-desync-fake-quic=\"%BIN%quic_initial_www_google_com.bin\""
+      ],
+      "dpiGeneral": [
+        "--dpi-desync=fake",
+        "--dpi-desync-fake-discord=\"%BIN%ACTIVE_DISCORD_UDP.bin\"",
+        "--dpi-desync-fake-stun=\"%BIN%ACTIVE_DISCORD_UDP.bin\"",
+        "--dpi-desync-repeats=6"
+      ],
+      "tags": [
+        "import",
+        "flowseal"
+      ],
+      "enabled": true,
+      "priority": 80,
+      "source": {
+        "repo": "Flowseal/zapret-discord-youtube",
+        "file": "general.bat"
+      }
     }
   ]
 }
