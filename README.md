@@ -17,7 +17,7 @@
   </p>
 
   <p>
-    <a href="https://github.com/awkcrud/AXON/releases/latest/download/AXON.exe"><b>Download</b></a>
+    <a href="https://github.com/awkcrud/axon-site/releases/download/1.6.0/AXON.exe"><b>Download</b></a>
     ·
     <a href="https://github.com/awkcrud/AXON/releases">Releases</a>
     ·
@@ -37,14 +37,14 @@ AXON - Windows-приложение для YouTube, Discord и Telegram.
 
 ## Install / Установка
 
-1. Download `AXON.exe` from [Releases](https://github.com/awkcrud/AXON/releases/latest)
+1. Download `AXON.exe` from [Releases](https://github.com/awkcrud/axon-site/releases/download/1.6.0/AXON.exe)
 2. Run as Administrator
 3. Sign in with your account
 4. Start a strategy for YouTube / Discord, or enable the Telegram proxy
 
 Close VPN and other proxy clients before starting.
 
-1. Скачай `AXON.exe` из [Releases](https://github.com/awkcrud/AXON/releases/latest)
+1. Скачай `AXON.exe` из [Releases](https://github.com/awkcrud/axon-site/releases/download/1.6.0/AXON.exe)
 2. Запусти от имени администратора
 3. Войди в аккаунт
 4. Запусти стратегию для YouTube / Discord или Telegram-прокси
