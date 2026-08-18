@@ -9,7 +9,7 @@
 
   <p>
     <a href="https://github.com/awkcrud/AXON/releases/latest">
-      <img src="https://img.shields.io/badge/release-v1.3.1-c5ff3a?style=for-the-badge&labelColor=0a0a0a" alt="Release"/>
+      <img src="https://img.shields.io/badge/release-v1.6.0-c5ff3a?style=for-the-badge&labelColor=0a0a0a" alt="Release"/>
     </a>
     <a href="https://github.com/awkcrud/AXON/releases/latest">
       <img src="https://img.shields.io/badge/download-AXON.exe-c5ff3a?style=for-the-badge&labelColor=0a0a0a" alt="Download"/>
