@@ -1,0 +1,6 @@
+{
+  "version": "1.3.1",
+  "notes": "AXON 1.3.1\n\n- Remote strategy catalog (40 technical DPI profiles)\n- Working-family variants: fake+fakedsplit, hostfakesplit, ClientHello, fake+multisplit\n- Clear disposable cache (account and engine kept)\n- Report broken strategy to admin\n- Engine and hostlists refresh for YouTube / Discord\n- Live sessions: one row per account\n\nAXON 1.3.1\n\n- Удалённый каталог стратегий (40 технических DPI-профилей)\n- Варианты рабочих семейств: fake+fakedsplit, hostfakesplit, ClientHello, fake+multisplit\n- Сброс расходного кэша (аккаунт и движок сохраняются)\n- Жалоба на сломанную стратегию админу\n- Обновлённый движок и списки хостов YouTube / Discord\n- Live sessions: одна строка на аккаунт",
+  "downloadUrl": "https://github.com/awkcrud/AXON/releases/latest/download/AXON.exe",
+  "releasedAt": "2026-07-23"
+}
