@@ -1,8 +1,41 @@
 {
-  "version": 7,
-  "updated": "2026-07-31",
-  "note": "Expanded with variants of working DPI families (fake+fakedsplit / hostfakesplit / fake+tls / fake+multisplit).",
+  "version": 8,
+  "updated": "2026-08-26",
+  "note": "AXON pack publish",
   "strategies": [
+    {
+      "id": "general_alt13",
+      "title": "general (ALT13)",
+      "titleRu": "general (ALT13)",
+      "titleEn": "general (ALT13)",
+      "blurbRu": "Импортированный профиль AXON",
+      "blurbEn": "Imported from Flowseal/zapret-discord-youtube",
+      "youtube": true,
+      "discord": true,
+      "quic": true,
+      "ytProfile": "alt",
+      "dpiCore": [
+        "--dpi-desync=fake",
+        "--dpi-desync-repeats=11",
+        "--dpi-desync-fake-quic=\"%BIN%quic_initial_www_google_com.bin\""
+      ],
+      "dpiGeneral": [
+        "--dpi-desync=fake",
+        "--dpi-desync-fake-discord=\"%BIN%ACTIVE_DISCORD_UDP.bin\"",
+        "--dpi-desync-fake-stun=\"%BIN%ACTIVE_DISCORD_UDP.bin\"",
+        "--dpi-desync-repeats=5"
+      ],
+      "tags": [
+        "import",
+        "flowseal"
+      ],
+      "enabled": true,
+      "priority": 80,
+      "source": {
+        "repo": "Flowseal/zapret-discord-youtube",
+        "file": "general (ALT13).bat"
+      }
+    },
     {
       "id": "balanced",
       "title": "Combined (Alt)",
